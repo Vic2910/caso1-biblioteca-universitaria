@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\FalloConexion;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,4 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // FR-008 / research D-006: ante un fallo de conexión a la base de
+        // datos la aplicación no continúa; muestra un aviso en español sin
+        // credenciales ni SQL (contrato user-messages.md §1).
+        $exceptions->render(function (Throwable $excepcion) {
+            if (FalloConexion::detectar($excepcion)) {
+                return response()->view('errors.conexion', [], 500);
+            }
+
+            return null;
+        });
     })->create();

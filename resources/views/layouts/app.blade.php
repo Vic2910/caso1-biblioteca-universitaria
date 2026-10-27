@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Biblioteca Universitaria')</title>
     <style>
-        :root {
+        html {
             --color-primario: #1f4e79;
             --color-fondo: #f5f7fa;
             --color-texto: #212529;
