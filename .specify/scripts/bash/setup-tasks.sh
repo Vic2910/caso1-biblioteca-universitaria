@@ -1,7 +1,6 @@
-#!/usr/bin/env bash
+ta#!/usr/bin/env bash
 
 set -e
-
 # Parse command line arguments
 JSON_MODE=false
 
