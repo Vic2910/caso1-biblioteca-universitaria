@@ -30,10 +30,10 @@ description: "Task list for 001-entorno-datos (Entorno y base de datos)"
 
 **Purpose**: Project initialization and basic structure per `plan.md` and `research.md` D-001/D-002/D-007/D-008
 
-- [ ] T001 Create Laravel 13 project skeleton in the repository root with `composer create-project laravel/laravel .` (PHP >= 8.3, Composer 2.x) producing the standard tree of `plan.md` §Source Code (`app/`, `database/`, `resources/`, `routes/`, `tests/`), then make the initial Conventional Commit containing the freshly created Laravel project (constitution «Flujo de desarrollo»: el primer commit contiene el proyecto Laravel recién creado)
-- [ ] T002 [P] Configure `.env.example` with the variables of `specs/001-entorno-datos/contracts/environment-variables.md` — `DB_CONNECTION=mysql`, `DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_DATABASE=biblioteca`, `DB_USERNAME=root`, `DB_PASSWORD` (vacío, **nunca versionado**), `APP_KEY` sin valor real — and confirm `.env` is listed in `.gitignore` (FR-007, D-007)
-- [ ] T003 [P] Configure `phpunit.xml` for the dedicated MySQL test database: `DB_CONNECTION=mysql`, `DB_DATABASE=biblioteca_test` (research D-008: RefreshDatabase sobre el mismo motor MySQL que desarrollo, sin SQLite en memoria)
-- [ ] T004 [P] Create the local MySQL 8 databases `biblioteca` (development) and `biblioteca_test` (tests) required by `php artisan migrate --seed` and `php artisan test` (research D-002); they will be documented in `README.md` during US1
+- [X] T001 Create Laravel 13 project skeleton in the repository root with `composer create-project laravel/laravel .` (PHP >= 8.3, Composer 2.x) producing the standard tree of `plan.md` §Source Code (`app/`, `database/`, `resources/`, `routes/`, `tests/`), then make the initial Conventional Commit containing the freshly created Laravel project (constitution «Flujo de desarrollo»: el primer commit contiene el proyecto Laravel recién creado)
+- [X] T002 [P] Configure `.env.example` with the variables of `specs/001-entorno-datos/contracts/environment-variables.md` — `DB_CONNECTION=mysql`, `DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_DATABASE=biblioteca`, `DB_USERNAME=root`, `DB_PASSWORD` (vacío, **nunca versionado**), `APP_KEY` sin valor real — and confirm `.env` is listed in `.gitignore` (FR-007, D-007)
+- [X] T003 [P] Configure `phpunit.xml` for the dedicated MySQL test database: `DB_CONNECTION=mysql`, `DB_DATABASE=biblioteca_test` (research D-008: RefreshDatabase sobre el mismo motor MySQL que desarrollo, sin SQLite en memoria)
+- [X] T004 [P] Create the local MySQL 8 databases `biblioteca` (development) and `biblioteca_test` (tests) required by `php artisan migrate --seed` and `php artisan test` (research D-002); they will be documented in `README.md` during US1
 
 **Checkpoint**: Laravel 13 installed, environment contract in place, databases ready — foundational work can begin
 
@@ -45,8 +45,8 @@ description: "Task list for 001-entorno-datos (Entorno y base de datos)"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create the shared Blade layout `resources/views/layouts/app.blade.php` (Principio V «layout Blade común»; base for `resources/views/welcome.blade.php`, `resources/views/errors/conexion.blade.php` in US1 and for `002-consulta-catalogo`+)
-- [ ] T006 [P] Register the placeholder route `GET /` in `routes/web.php` rendering the `welcome` view (content and DB connectivity check completed in US1)
+- [X] T005 Create the shared Blade layout `resources/views/layouts/app.blade.php` (Principio V «layout Blade común»; base for `resources/views/welcome.blade.php`, `resources/views/errors/conexion.blade.php` in US1 and for `002-consulta-catalogo`+)
+- [X] T006 [P] Register the placeholder route `GET /` in `routes/web.php` rendering the `welcome` view (content and DB connectivity check completed in US1)
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
