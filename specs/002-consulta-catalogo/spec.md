@@ -8,6 +8,17 @@
 
 **Input**: User description: "# Especificación funcional: Consulta del catálogo y detalle de libros — consultar los libros del catálogo en un listado paginado con imagen predeterminada para libros sin portada, y abrir la ficha de un libro para ver sus datos y su categoría. Fase 1; entrada: Constitución del Caso 1 - Biblioteca Universitaria, versión 1.0. (Borrador funcional completo recibido como descripción de la funcionalidad.)"
 
+## Clarifications
+
+### Session 2026-10-26
+
+- Q: Al listar los libros en el catálogo paginado, ¿qué datos debe mostrar cada libro en su fila o tarjeta además de la portada? → A: Portada, título, autor, año de publicación y categoría.
+- Q: Cuando dos libros comparten el mismo título, ¿qué campo debe definir el orden en que aparecen en el listado? → A: Por autor de la A a la Z (y, si coincide también, por ISBN).
+- Q: Cuando se pide un libro inexistente o una página fuera de rango, ¿qué respuesta HTTP debe devolver la aplicación junto a la página de error? → A: HTTP 404 con vista de error personalizada y enlace para volver al catálogo.
+- Q: ¿Qué campos exactos debe mostrar la ficha de detalle de un libro cuando se abre? → A: Todos los campos de la entidad Libro: portada, título, autor, editorial, año de publicación, ISBN, total de ejemplares, ejemplares disponibles y categoría.
+- Q: ¿Cómo debe ordenarse el listado del catálogo cuando los títulos contienen letras con tilde o mayúsculas y minúsculas? → A: Orden alfabético en español que ignora tildes y diferencias de mayúsculas/minúsculas ("Álgebra" se ordena como "Algebra").
+- Q: ¿Cómo llega el usuario desde el listado a la ficha de detalle de un libro? → A: Toda la tarjeta o fila del libro es un enlace clicable al detalle.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Consultar el catálogo (Priority: P1)
@@ -24,7 +35,7 @@ Como estudiante, docente o integrante del personal administrativo, quiero consul
 2. **Given** un libro sin portada, **When** aparece en el listado, **Then** se muestra la imagen predeterminada en lugar de un espacio vacío.
 3. **Given** un catálogo cuyos libros superan una página, **When** el usuario pasa a la página siguiente o vuelve a la anterior, **Then** el listado muestra los libros de esa página y se conserva el acceso al resto del catálogo.
 4. **Given** un catálogo sin libros, **When** se abre el listado, **Then** se muestra el mensaje amigable «No hay libros registrados aún».
-5. **Given** una página solicitada fuera del rango válido, **When** se pide esa página, **Then** se muestra una página de error con un enlace para volver al catálogo.
+5. **Given** una página solicitada fuera del rango válido, **When** se pide esa página, **Then** se muestra una página de error (HTTP 404) con un enlace para volver al catálogo.
 
 ---
 
@@ -38,17 +49,17 @@ Como usuario, quiero ver la ficha de un libro para conocer sus datos completos y
 
 **Acceptance Scenarios**:
 
-1. **Given** un libro existente, **When** se abre su detalle, **Then** se muestran sus datos bibliográficos, sus cantidades de ejemplares y su categoría relacionada.
+1. **Given** un libro existente, **When** se abre su detalle, **Then** se muestran todos sus campos (título, autor, editorial, año de publicación, ISBN, ejemplares total y disponibles) y su categoría relacionada.
 2. **Given** un libro sin portada, **When** se abre su detalle, **Then** se muestra la imagen predeterminada, igual que en el listado.
-3. **Given** un identificador de libro inexistente, **When** se pide su detalle, **Then** se muestra una página de error con un enlace para volver al catálogo.
+3. **Given** un identificador de libro inexistente, **When** se pide su detalle, **Then** se muestra una página de error (HTTP 404) con un enlace para volver al catálogo.
 
 ---
 
 ### Edge Cases
 
 - Catálogo vacío: al abrir el listado sin libros se muestra el mensaje amigable «No hay libros registrados aún», presentado en la zona del listado.
-- Libro inexistente o página fuera de rango: se muestra una página de error con un mensaje claro (p. ej., «Libro no encontrado» o «Página no válida») y un enlace para volver al catálogo.
-- Tamaño de página y orden del listado: 10 libros por página, en orden alfabético por título de la A a la Z.
+- Libro inexistente o página fuera de rango: se devuelve HTTP 404 con una vista de error personalizada con un mensaje claro (p. ej., «Libro no encontrado» o «Página no válida») y un enlace para volver al catálogo.
+- Tamaño de página y orden del listado: 10 libros por página, en orden alfabético por título de la A a la Z ignorando tildes y mayúsculas/minúsculas, con desempate por autor y después por ISBN.
 - Última página incompleta: cuando la última página contiene menos libros que el tamaño de página, se muestran solo los libros existentes, sin posiciones vacías.
 - Portada no disponible: si la portada registrada de un libro no puede mostrarse, se aplica la misma imagen predeterminada que a un libro sin portada.
 
@@ -56,11 +67,11 @@ Como usuario, quiero ver la ficha de un libro para conocer sus datos completos y
 
 ### Functional Requirements
 
-- **FR-001**: El usuario debe poder consultar un listado paginado de libros y desplazarse entre páginas.
-- **FR-002**: El usuario debe poder abrir el detalle de un libro y consultar sus datos bibliográficos, sus cantidades de ejemplares y su categoría.
+- **FR-001**: El usuario debe poder consultar un listado paginado de libros y desplazarse entre páginas; cada libro se muestra con su portada (o la imagen predeterminada), título, autor, año de publicación y categoría, y toda su tarjeta o fila es un enlace clicable que abre el detalle del libro.
+- **FR-002**: El usuario debe poder abrir el detalle de un libro y consultar todos sus campos: portada (o imagen predeterminada), título, autor, editorial, año de publicación, ISBN, total de ejemplares, ejemplares disponibles y categoría.
 - **FR-003**: El listado y el detalle deben mostrar una imagen predeterminada común cuando el libro no tenga portada o esta no esté disponible.
 - **FR-004**: Las vistas de listado y detalle deben compartir una estructura visual común (cabecera, navegación y pie) y presentar una interfaz clara y coherente para estudiantes, docentes y personal administrativo.
-- **FR-005**: El listado debe agrupar los libros en páginas de 10 libros, en orden alfabético por título de la A a la Z.
+- **FR-005**: El listado debe agrupar los libros en páginas de 10 libros, en orden alfabético por título de la A a la Z ignorando tildes y diferencias de mayúsculas/minúsculas («Álgebra» se ordena como «Algebra»), con desempate por autor y, en último lugar, por ISBN, de modo que el orden sea siempre determinista.
 
 ### Key Entities
 
