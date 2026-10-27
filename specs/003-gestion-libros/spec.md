@@ -8,6 +8,16 @@
 
 **Input**: User description: "# Especificación funcional: Gestión de libros y categorías — Registrar, editar y eliminar libros del catálogo de la Biblioteca Universitaria, con validación en el servidor, confirmación de eliminación y relación con categorías y préstamos. Fase 2; amplía la consulta de la Fase 1."
 
+## Clarifications
+
+### Session 2026-10-26
+
+- Q: Cuando el usuario crea o edita un libro, ¿debe poder cambiar manualmente el número de "ejemplares disponibles" o debe calcularse automáticamente (total menos préstamos activos) y quedar como solo lectura? → A: Calculado automáticamente: el formulario no ofrece el campo "disponibles"; al crear el libro se fija igual al total y solo lo modifican los préstamos (crear/devolver). El total sigue siendo editable con las reglas FR-007.
+- Q: En los formularios de registro y edición de libros de esta funcionalidad, ¿cómo debe manejarse la portada, sabiendo que la gestión de imágenes (subida, validación y eliminación de archivos) se especifica por separado en la funcionalidad 005? → A: El formulario de libro ya admite subir la portada con las validaciones básicas de la constitución (JPG, PNG o WebP de hasta 2 MB); el reemplazo y la eliminación de archivos al editar llegan con la funcionalidad 005.
+- Q: ¿Cómo debe definirse la unicidad del nombre de una categoría, es decir, qué nombres se consideran repetidos y deben rechazarse con un error en español junto al campo? → A: Único ignorando mayúsculas/minúsculas, tildes y espacios sobrantes: «Matemáticas», «matematicas» y « Matemáticas » se consideran duplicados y el intento repetido se rechaza con error junto al campo (también al editar).
+- Q: ¿Desde dónde debe acceder el usuario a las operaciones de gestión (registrar, editar y eliminar libros; crear, editar y eliminar categorías): desde las vistas de consulta de la Fase 1 o desde vistas de gestión propias? → A: Ampliar las vistas de la Fase 1: el listado del catálogo y la ficha de detalle incorporan botones de "Nuevo libro", "Editar" y "Eliminar", y las categorías se gestionan desde una vista propia de listado; una sola vista sirve para consultar y gestionar.
+- Q: ¿Queda confirmado que esta funcionalidad se limita al CRUD de libros y categorías, dejando fuera el registro y control de préstamos (004), el reemplazo y borrado de archivos de portada (005), la búsqueda o filtro del catálogo (006) y el panel de biblioteca (007)? → A: Sí, solo CRUD de libros y categorías; los préstamos solo intervienen como reglas de restricción (FR-007 y FR-009).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Registrar y editar libros (Priority: P1)
@@ -24,6 +34,8 @@ Como usuario encargado de la gestión, quiero registrar y actualizar libros para
 2. **Given** un libro existente, **When** se envían cambios válidos desde el formulario de edición, **Then** el detalle del libro muestra los datos actualizados.
 3. **Given** un ISBN repetido o con longitud distinta de 13 dígitos, o un año anterior a 1900 o posterior al año actual, **When** se intenta guardar el formulario, **Then** el sistema rechaza el dato, muestra un error en español junto al campo correspondiente y conserva los valores introducidos por el usuario.
 4. **Given** el formulario de registro vacío o incompleto, **When** se intenta guardar sin completar los campos obligatorios, **Then** el sistema muestra errores en español junto a cada campo faltante y no crea el libro.
+5. **Given** el formulario de registro con un archivo de portada, **When** se envía una imagen JPG, PNG o WebP de hasta 2 MB, **Then** el libro se guarda con su portada y el detalle muestra la imagen subida.
+6. **Given** el formulario de registro con un archivo de portada de formato distinto de JPG, PNG o WebP o superior a 2 MB, **When** se intenta guardar, **Then** el sistema rechaza el guardado con un error en español junto al campo de portada y conserva los demás valores introducidos.
 
 ---
 
@@ -57,6 +69,7 @@ Como usuario encargado de la gestión, quiero crear, editar y eliminar categorí
 2. **Given** una categoría existente, **When** el usuario envía un nombre actualizado, **Then** el cambio se refleja en el listado y en los libros que la usan.
 3. **Given** una categoría sin libros asociados, **When** el usuario confirma su eliminación, **Then** la categoría se elimina mediante una solicitud `DELETE` y desaparece de todos los selectores.
 4. **Given** una categoría asociada a uno o más libros, **When** el usuario intenta eliminarla, **Then** el sistema bloquea la operación, muestra un mensaje en español y la categoría permanece disponible.
+5. **Given** una categoría existente «Matemáticas», **When** se intenta guardar otra categoría con un nombre que solo difiera en tildes, mayúsculas o espacios sobrantes (por ejemplo, «matematicas »), **Then** el sistema rechaza el guardado con un error en español junto al campo y no crea la categoría.
 
 ---
 
@@ -65,27 +78,28 @@ Como usuario encargado de la gestión, quiero crear, editar y eliminar categorí
 - ISBN con ceros iniciales: se trata como una secuencia de 13 dígitos, conservando los ceros; no se aceptan separadores (guiones, espacios) ni ningún carácter no numérico [asumido, ver Supuestos].
 - Año 1900 y año actual: son límites válidos e incluidos; cualquier año fuera del rango (1899 o posterior al año en curso) se rechaza.
 - ISBN duplicado concurrente: si dos registros intentan usar el mismo ISBN, solo se acepta el primero y el segundo recibe error junto al campo.
-- Cantidad total o disponibilidad incoherentes: se rechaza cualquier guardado donde el total sea menor que 1, la disponibilidad quede fuera del rango 0–total, o el total intentado sea inferior al número de préstamos activos del libro.
+- Cantidad total incoherente: se rechaza cualquier guardado donde el total sea menor que 1 o el total intentado sea inferior al número de préstamos activos del libro; la disponibilidad no se captura en el formulario y se mantiene como total menos préstamos activos.
 - Libro con préstamos asociados: la eliminación se bloquea y se muestra un mensaje en español; el libro permanece en el catálogo.
 - Eliminación interrumpida: si la operación de borrado falla, el usuario recibe un mensaje en español y el libro permanece en el catálogo.
+- Portada inválida: un archivo que no sea JPG, PNG o WebP o que supere los 2 MB se rechaza con un error en español junto al campo y el libro no se guarda; el reemplazo o la eliminación de una portada ya existente queda fuera de esta funcionalidad.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El usuario debe poder crear, listar, consultar, editar y eliminar libros del catálogo.
+- **FR-001**: El usuario debe poder crear, listar, consultar, editar y eliminar libros del catálogo. Las operaciones de gestión se ofrecen desde las vistas de la Fase 1: el listado del catálogo y la ficha de detalle incorporan los controles de "Nuevo libro", "Editar" y "Eliminar"; las categorías se gestionan desde una vista propia de listado de categorías en la que se pueden crear, editar y eliminar.
 - **FR-002**: El sistema debe registrar los atributos de Libro definidos en la constitución (ISBN, título, autor, editorial, año de publicación, número de ejemplares, ejemplares disponibles, categoría y portada) y asociar una categoría a cada libro.
 - **FR-003**: El sistema debe validar en el servidor que el ISBN sea único y tenga exactamente 13 dígitos, y que el año de publicación esté entre 1900 y el año actual inclusive.
 - **FR-004**: El sistema debe mostrar los errores en español junto al campo correspondiente y conservar los valores ingresados por el usuario tras un error.
 - **FR-005**: El sistema debe solicitar confirmación al usuario antes de eliminar y realizar la eliminación mediante una solicitud `DELETE`; nunca debe eliminar mediante GET.
-- **FR-006**: Son campos obligatorios: ISBN, título, autor, editorial, año de publicación, categoría y número de ejemplares; la portada es opcional. El título y el autor deben tener al menos 2 caracteres y no más de 255; las cantidades deben ser números enteros.
-- **FR-007**: El sistema debe validar en el servidor que el número de ejemplares total sea un entero mayor o igual que 1, que los ejemplares disponibles sean un entero entre 0 y el total inclusive, y que el total no pueda editarse a un valor inferior al número de préstamos activos del libro.
-- **FR-008**: El usuario debe poder crear, editar y eliminar categorías; una categoría solo puede eliminarse si no tiene libros asociados y, en caso contrario, el sistema debe bloquear la operación con un mensaje en español.
+- **FR-006**: Son campos obligatorios: ISBN, título, autor, editorial, año de publicación, categoría y número de ejemplares; la portada es opcional. El título y el autor deben tener al menos 2 caracteres y no más de 255; las cantidades deben ser números enteros. La portada, cuando se envía, debe ser un archivo JPG, PNG o WebP de hasta 2 MB; un archivo que no cumpla estas condiciones se rechaza con un error en español junto al campo y no se guarda.
+- **FR-007**: El sistema debe validar en el servidor que el número de ejemplares total sea un entero mayor o igual que 1 y que el total no pueda editarse a un valor inferior al número de préstamos activos del libro. Los ejemplares disponibles no se capturan en el formulario: el sistema los calcula como total menos préstamos activos, los fija iguales al total al crear el libro y los ajusta automáticamente al registrar préstamos y devoluciones.
+- **FR-008**: El usuario debe poder crear, editar y eliminar categorías; una categoría solo puede eliminarse si no tiene libros asociados y, en caso contrario, el sistema debe bloquear la operación con un mensaje en español. El nombre de categoría debe ser único ignorando mayúsculas/minúsculas, tildes y espacios sobrantes: un nombre que, una vez normalizado, coincida con el de otra categoría existente se rechaza en el servidor con un error en español junto al campo, tanto al crear como al editar.
 - **FR-009**: El sistema debe bloquear la eliminación de un libro que tenga préstamos registrados, indicándolo al usuario con un mensaje en español antes de confirmar.
 
 ### Key Entities
 
-- **Libro**: registro bibliográfico con ISBN único, datos de publicación, categoría asociada, cantidades de ejemplares (total y disponibles) y portada.
+- **Libro**: registro bibliográfico con ISBN único, datos de publicación, categoría asociada, cantidades de ejemplares (total y disponibles, estos últimos calculados como total menos préstamos activos) y portada.
 - **Categoría**: clasificación que puede asociarse a uno o varios libros.
 - **Préstamo**: registro relacionado con un libro y un estudiante que puede afectar la disponibilidad y la elegibilidad para eliminación de un libro.
 
@@ -98,17 +112,19 @@ Como usuario encargado de la gestión, quiero crear, editar y eliminar categorí
 - **SC-003**: Ninguna eliminación probada se ejecuta sin confirmación previa del usuario ni mediante una solicitud GET.
 - **SC-004**: El 100 % de los formularios con errores conservan los valores introducidos por el usuario y muestran mensajes en español.
 - **SC-005**: Tras una edición válida, el 100 % de los detalles consultados muestran exactamente los datos actualizados.
-- **SC-006**: El 100 % de los guardados con cantidades incoherentes (total menor que 1, disponibilidad fuera de 0–total o total inferior a préstamos activos) se rechazan con error junto al campo.
-- **SC-007**: Las operaciones de categoría se completan en el 100 % de los casos válidos probados, y ninguna categoría con libros asociados se elimina.
+- **SC-006**: El 100 % de los guardados con cantidades incoherentes (total menor que 1 o total inferior a préstamos activos) se rechazan con error junto al campo, y el 100 % de los libros mantiene los ejemplares disponibles iguales a total menos préstamos activos tras crear préstamos o devoluciones.
+- **SC-007**: Las operaciones de categoría se completan en el 100 % de los casos válidos probados, ninguna categoría con libros asociados se elimina y el 100 % de los intentos de guardar un nombre duplicado (ignorando tildes, mayúsculas y espacios sobrantes) se rechazan con error junto al campo.
+- **SC-008**: El 100 % de las portadas enviadas en formato JPG, PNG o WebP de hasta 2 MB se guardan correctamente, y el 100 % de los archivos con otro formato o tamaño superior a 2 MB se rechazan con un error visible junto al campo.
 
 ## Assumptions
 
 - «Usuario encargado» identifica a quien realiza la tarea; no implica un rol ni un sistema de permisos definido en esta funcionalidad.
-- La gestión de portadas (subida, validación y eliminación de imágenes) se especifica por separado; aquí solo se asocia una portada opcional al libro.
+- El formulario de registro de libros ya admite la subida de una portada opcional con las validaciones básicas de la constitución (JPG, PNG o WebP de hasta 2 MB); el reemplazo y la eliminación de archivos al editar se especifican por separado en la funcionalidad de portadas (005) (respuesta Q5, opción B).
 - El ISBN se acepta únicamente como secuencia de 13 dígitos sin separadores ni caracteres no numéricos; los ceros iniciales se conservan.
 - Los campos obligatorios y longitudes mínimas de FR-006 son un valor por defecto razonable derivado de los atributos de la constitución; pueden ajustarse en la fase de clarificación.
-- La eliminación de un libro se bloquea si tiene préstamos registrados (respuesta Q1, opción A); la edición de cantidades sigue la regla de FR-007 (respuesta Q3, opción A).
-- El mantenimiento de categorías incluye crear, editar y eliminar (respuesta Q2, opción B), sin distinción de roles: cualquier usuario encargado de la gestión puede realizarlo.
+- La eliminación de un libro se bloquea si tiene préstamos registrados (respuesta Q1, opción A); la edición de cantidades sigue la regla de FR-007 (respuesta Q3, opción A); los ejemplares disponibles se calculan automáticamente y no se editan en el formulario (respuesta Q4, opción A).
+- El mantenimiento de categorías incluye crear, editar y eliminar (respuesta Q2, opción B), sin distinción de roles: cualquier usuario encargado de la gestión puede realizarlo; el nombre de categoría es único ignorando tildes, mayúsculas y espacios sobrantes (respuesta Q6, opción A).
 - El año actual se calcula con respecto al momento en que se realiza la operación.
-- La consulta y el listado de libros ya existentes proceden de la Fase 1; esta funcionalidad los amplía con creación, edición y eliminación.
+- La consulta y el listado de libros ya existentes proceden de la Fase 1; esta funcionalidad los amplía con creación, edición y eliminación. Las vistas de la Fase 1 se amplían con los controles de gestión y las categorías tienen una vista propia de listado (respuesta Q7, opción A).
+- Alcance excluido confirmado: el registro y control de préstamos (funcionalidad 004), el reemplazo y la eliminación de archivos de portada (005), la búsqueda o filtro del catálogo (006) y el panel de biblioteca (007) quedan fuera de esta funcionalidad; los préstamos solo intervienen como reglas de restricción de FR-007 y FR-009 (respuesta Q8, opción A).
 - No se definen objetivos de rendimiento adicionales más allá de la respuesta estándar de una aplicación web local.
