@@ -1,9 +1,10 @@
-# Biblioteca Universitaria — Fase 1: entorno y base de datos
+# Biblioteca Universitaria — Gestión de libros y catálogo
 
 Aplicación web local para la gestión de una biblioteca universitaria, construida
-con **Laravel 13** (PHP >= 8.3) y una base de datos relacional. Esta primera
-fase deja el entorno y los datos listos: esquema versionado con migraciones,
-datos de prueba cargados y avisos en español ante fallos de conexión.
+con **Laravel 13** (PHP >= 8.3) y una base de datos relacional. La base queda
+lista con esquema versionado con migraciones y datos de prueba; sobre ella se
+ofrece la consulta del catálogo y el **CRUD de libros y categorías** con
+validación y mensajes en español.
 
 ## Requisitos previos
 
@@ -84,10 +85,10 @@ ni SQL.
 
 ## Consulta del catálogo
 
-La navegación común (cabecera) incluye el enlace **«Catálogo»**, que distingue
-visualmente la página activa y funciona en todas las vistas, incluidas las de
-error. La aplicación ofrece dos rutas de consulta, sin autenticación en esta
-fase:
+La navegación común (cabecera) incluye los enlaces **«Catálogo»** y
+**«Categorías»**, que distinguen visualmente la página activa y funcionan en
+todas las vistas, incluidas las de error. La consulta del catálogo ofrece dos
+rutas, sin autenticación en esta fase:
 
 | Método y ruta | Nombre | Contenido |
 |---|---|---|
@@ -110,6 +111,84 @@ fase:
 | Listado (`/catalogo`) | Detalle (`/catalogo/{id}`) |
 |---|---|
 | ![Listado paginado del catálogo](public/images/capturas/catalogo-listado.png) | ![Ficha de detalle de un libro](public/images/capturas/catalogo-detalle.png) |
+
+## Gestión de libros y categorías
+
+Además de la consulta, la aplicación permite **crear, editar y eliminar** libros
+y categorías desde su propia interfaz (sin autenticación en esta fase). Toda
+escritura pasa por un formulario validado en el servidor; los mensajes de error
+aparecen **junto al campo** correspondiente y lo escrito se conserva (`old()`).
+
+| Ruta | Nombre | Contenido |
+|---|---|---|
+| `GET /libros/crear` | `libros.create` | Alta de libro |
+| `POST /libros` | `libros.store` | Registro validado |
+| `GET /libros/{id}/editar` | `libros.edit` | Edición precargada |
+| `PUT /libros/{id}` | `libros.update` | Actualización validada |
+| `DELETE /libros/{id}` | `libros.destroy` | Eliminación con confirmación |
+| `GET /categorias` | `categorias.index` | Listado con la cantidad de libros asociados |
+| `GET /categorias/crear` | `categorias.create` | Alta de categoría |
+| `POST /categorias` | `categorias.store` | Registro validado |
+| `GET /categorias/{id}/editar` | `categorias.edit` | Edición precargada |
+| `PUT /categorias/{id}` | `categorias.update` | Actualización validada |
+| `DELETE /categorias/{id}` | `categorias.destroy` | Eliminación con confirmación |
+
+### Reglas de creación y edición de libros
+
+- **ISBN**: obligatorio, exactamente **13 dígitos** sin guiones ni espacios, y
+  **único** en toda la base de datos (duplicado → «El ISBN ya está registrado en
+  otro libro.»).
+- **Año de publicación**: obligatorio y dentro del rango **1900 … año actual**.
+- **Número de ejemplares**: entero ≥ 1. En edición no puede bajar por debajo de
+  los **préstamos activos** del libro («El número de ejemplares no puede ser
+  inferior a los préstamos activos (n).»).
+- **Categoría**: obligatoria; el formulario solo ofrece categorías existentes.
+- **Portada** (opcional): imagen JPG, PNG o WebP de hasta 2 MB. Requiere haber
+  ejecutado `php artisan storage:link` (ver «Instalación»). Al editar sin
+  enviar archivo, la portada existente **queda intacta**.
+- **Disponibilidad derivada**: el formulario **no** contiene un campo
+  «ejemplares disponibles»; el servidor lo calcula siempre como
+  `ejemplares_totales − préstamos activos` en cada guardado.
+
+### Gestión de categorías y unicidad normalizada
+
+El nombre de categoría es **único ignorando mayúsculas, acentos y espacios**:
+con «Matemáticas» dada de alta, crear «matematicas », «MATEMATICAS» o
+«Matematicas» se rechaza con «Ese nombre de categoría ya existe.» junto al
+campo, y lo mismo al editar **otra** categoría hacia alguna de esas variantes
+(editar «Matemáticas» conservando su propio nombre sí es válido). La garantía
+tiene tres capas independientes:
+
+1. Validación `unique` en el formulario (primer aviso, junto al campo).
+2. Recorte de espacios (`trim`) antes de validar y al persistir.
+3. Collation de la base de datos (`utf8mb4_0900_ai_ci` en `categorias.nombre`,
+   con variantes `utf8mb4_uca1400_ai_ci` en MariaDB 10.11+ y
+   `utf8mb4_unicode_520_ci` en MySQL 5.7) más el índice `UNIQUE`, de modo que
+   incluso dos altas simultáneas por fuera de la interfaz colisionan en la
+   base de datos.
+
+### Eliminaciones con confirmación
+
+Toda eliminación se envía mediante **`DELETE`** (nunca `GET`), con un
+`confirm()` en el navegador y las tres capas de protección: comprobación
+previa, respaldo `RESTRICT` de la base de datos y confirmación del usuario.
+
+| Intento | Resultado | Aviso |
+|---|---|---|
+| Eliminar un libro con préstamos | Bloqueado | «El libro tiene préstamos registrados y no puede eliminarse.» |
+| Eliminar una categoría con libros | Bloqueado | «La categoría tiene libros asociados y no puede eliminarse.» |
+| Eliminar un libro sin préstamos | Confirmación y borrado | «Libro eliminado correctamente.» |
+| Eliminar una categoría sin libros | Confirmación y borrado | «Categoría eliminada correctamente.» |
+
+### Capturas de gestión
+
+| Alta de libro (`/libros/crear`) | Edición de libro (`/libros/{id}/editar`) |
+|---|---|
+| ![Formulario de alta de un libro](public/images/capturas/libros-crear.png) | ![Formulario de edición de un libro](public/images/capturas/libros-editar.png) |
+
+| Listado (`/categorias`) | Alta / Edición de categoría |
+|---|---|
+| ![Listado de categorías con libros asociados](public/images/capturas/categorias-listado.png) | ![Formulario de una categoría](public/images/capturas/categorias-crear.png) ![Edición de una categoría](public/images/capturas/categorias-editar.png) |
 
 ## Verificación
 
@@ -146,29 +225,22 @@ Los datos de prueba (`php artisan migrate:fresh --seed`) cargan 3 categorías,
 ## Eliminación de registros relacionados
 
 La eliminación de un registro con hijos está **bloqueada** mientras existan
-registros relacionados. La aplicación lo comprueba antes de borrar y la base de
-datos lo refuerza con claves foráneas `ON DELETE RESTRICT`:
-
-| Intento | Resultado | Aviso |
-|---|---|---|
-| Eliminar una categoría que tiene libros | Bloqueado | La categoría tiene libros asociados y no puede eliminarse mientras los tenga |
-| Eliminar un libro que tiene préstamos | Bloqueado | El libro tiene préstamos asociados y no puede eliminarse mientras los tenga |
-| Eliminar una categoría sin libros | Eliminación correcta | Confirmación de la operación |
-| Eliminar un libro sin préstamos | Eliminación correcta | Confirmación de la operación |
-
-Toda eliminación se realiza mediante `DELETE` con confirmación, nunca mediante
-`GET`. El aviso de bloqueo se muestra en español y nunca expone credenciales ni
-SQL.
+registros relacionados (comprobación previa en la aplicación y claves foráneas
+`ON DELETE RESTRICT` en la base de datos). El detalle de los avisos y de las
+capas de confirmación está en «Eliminaciones con confirmación», más arriba.
 
 ## Estructura del proyecto
 
 ```text
-app/Models/            # Categoría, Libro y Prestamo (Eloquent)
-app/Services/          # EliminacionService (comprobación previa de borrado)
-app/Exceptions/        # FalloConexion (aviso en español ante error de BD)
-database/migrations/   # única fuente del esquema
-database/factories/    # datos de prueba deterministas
-database/seeders/      # CatalogoSeeder (3 categorías, 16 libros, 3 préstamos)
-resources/views/       # layout común, página de inicio y aviso de conexión
-tests/Feature/         # pruebas de migraciones, semilla, conexión y borrado
+app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController
+app/Http/Requests/      # LibroStoreRequest, LibroUpdateRequest, CategoriaStoreRequest…
+app/Models/             # Categoría, Libro y Prestamo (Eloquent)
+app/Services/           # EliminacionService (comprobación previa de borrado)
+app/Exceptions/         # FalloConexion (aviso en español ante error de BD)
+lang/es/                # mensajes de validación en español
+database/migrations/    # única fuente del esquema
+database/factories/     # datos de prueba deterministas
+database/seeders/       # CatalogoSeeder (3 categorías, 16 libros, 3 préstamos)
+resources/views/        # layout común, catálogo, libros, categorías y errores
+tests/Feature/          # pruebas de catálogo, gestión y casos heredados de la Fase 1
 ```

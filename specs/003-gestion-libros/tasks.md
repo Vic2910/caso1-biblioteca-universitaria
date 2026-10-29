@@ -143,11 +143,11 @@ description: "Task list for 003-gestion-libros (Gestión de libros y categorías
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T038 [P] Create `tests/Feature/GestionLayoutTest.php` covering quickstart V-012 and D-025: every management view (`/libros/crear`, `/libros/{id}/editar`, `/categorias`, `/categorias/crear`, `/categorias/{id}/editar`, plus the extended catalog listing/detail) renders inside `layouts/app.blade.php` with the same header/navigation/footer; all forms contain `@csrf` and the edit/delete forms contain `@method`; forcing a validation error re-renders with each message next to its field and `old()` values intact (SC-004)
-- [ ] T039 [P] Execute every scenario V-001 to V-012 of `specs/003-gestion-libros/quickstart.md` plus the «Comprobaciones transversales» (GET to delete routes → 405; no `ejemplares_disponibles` input in any form; `@csrf`/`@method` present; a title containing `<script>` is escaped with `{{ }}`; `/libros/99999/editar` and `/categorias/99999/editar` render the Spanish 404 with the shared layout) and record the results (SC-001…SC-008 coverage)
-- [ ] T040 [P] Update `README.md` in Spanish documenting the CRUD: book creation/editing rules (unique 13-digit ISBN, year 1900–current, derived availability, optional cover with `storage:link`), category management and normalized uniqueness, deletion blocks and confirmations, plus screenshots of the forms (plan.md G9, constitution «Flujo de desarrollo» — README as official documentation)
-- [ ] T041 [P] Final security and consistency sweep across `app/`, `resources/`, `routes/` and `lang/`: no `$request->all()` in controllers, no concatenated SQL, all dynamic output escaped with `{{ }}` (including titles/names interpolated in `confirm()` texts and notices), every delete form has `@csrf` + `@method('DELETE')`, all visible messages in Spanish without technical details (Principio II/IV, contracts/user-messages §6)
-- [ ] T042 Run the full `php artisan test` one last time, clean up code, and commit all remaining changes with Conventional Commits on `feature/gestion-libros` (constitution «Flujo de desarrollo», plan.md G9)
+- [X] T038 [P] Create `tests/Feature/GestionLayoutTest.php` covering quickstart V-012 and D-025: every management view (`/libros/crear`, `/libros/{id}/editar`, `/categorias`, `/categorias/crear`, `/categorias/{id}/editar`, plus the extended catalog listing/detail) renders inside `layouts/app.blade.php` with the same header/navigation/footer; all forms contain `@csrf` and the edit/delete forms contain `@method`; forcing a validation error re-renders with each message next to its field and `old()` values intact (SC-004)
+- [X] T039 [P] Execute every scenario V-001 to V-012 of `specs/003-gestion-libros/quickstart.md` plus the «Comprobaciones transversales» (GET to delete routes → 405; no `ejemplares_disponibles` input in any form; `@csrf`/`@method` present; a title containing `<script>` is escaped with `{{ }}`; `/libros/99999/editar` and `/categorias/99999/editar` render the Spanish 404 with the shared layout) and record the results (SC-001…SC-008 coverage)
+- [X] T040 [P] Update `README.md` in Spanish documenting the CRUD: book creation/editing rules (unique 13-digit ISBN, year 1900–current, derived availability, optional cover with `storage:link`), category management and normalized uniqueness, deletion blocks and confirmations, plus screenshots of the forms (plan.md G9, constitution «Flujo de desarrollo» — README as official documentation)
+- [X] T041 [P] Final security and consistency sweep across `app/`, `resources/`, `routes/` and `lang/`: no `$request->all()` in controllers, no concatenated SQL, all dynamic output escaped with `{{ }}` (including titles/names interpolated in `confirm()` texts and notices), every delete form has `@csrf` + `@method('DELETE')`, all visible messages in Spanish without technical details (Principio II/IV, contracts/user-messages §6)
+- [X] T042 Run the full `php artisan test` one last time, clean up code, and commit all remaining changes with Conventional Commits on `feature/gestion-libros` (constitution «Flujo de desarrollo», plan.md G9)
 
 ---
 
@@ -280,3 +280,36 @@ With multiple developers:
 - Stop at any checkpoint to validate the story independently
 - Avoid: vague tasks, same-file conflicts, cross-story dependencies that break independence
 - Out of scope (do NOT implement here): loan registration/control (`004`), cover file replacement/deletion (`005`), catalog search/filter (`006`), dashboard (`007`); loans only appear as read-only restrictions in FR-007/FR-009
+
+---
+
+## Registro de validación (T039)
+
+Barrido de quickstart.md ejecutado contra `php artisan serve` (datos sembrados:
+3 categorías, 16 libros, 3 préstamos) y con la suite automatizada completa.
+
+| Escenario | Resultado | Evidencia |
+|---|---|---|
+| V-001 Alta válida | OK | `LibroCreacionTest` (302 a la ficha, flash «Libro registrado correctamente.», disponibles = totales) |
+| V-002 Edición válida | OK | `LibroEdicionTest` (ficha con datos actualizados) |
+| V-003 ISBN inválido/duplicado | OK | `LibroCreacionTest` («123», no numérico y duplicado rechazados junto al campo; `old()` conservado) |
+| V-004 Año fuera de rango / vacío | OK | `LibroCreacionTest` (1899 y año+1 rechazados; formulario vacío → errores junto a cada campo, nada guardado) |
+| V-005 Total incoherente al editar | OK | `LibroEdicionTest` (total < préstamos activos rechazado; subirlo recalcula disponibles) |
+| V-006 Eliminación con confirmación | OK | `LibroEliminacionTest` (solo DELETE, flash «Libro eliminado correctamente.») |
+| V-007 Eliminación cancelada o bloqueada | OK | `LibroEliminacionTest` (libro con préstamos bloqueado en 3 capas; GET → 405 sin borrar) |
+| V-008 Portada válida/inválida | OK | `LibroPortadaTest` (JPG/PNG/WebP ≤ 2 MB guardados; `.txt` y > 2 MB rechazados junto al campo) |
+| V-009 CRUD de categorías | OK | `CategoriaGestionTest` + barrido en vivo: creada/editada visible en `/categorias` y en el selector de `/libros/crear` |
+| V-010 Eliminación de categoría | OK | `CategoriaGestionTest` (sin libros se elimina y desaparece de los selectores; con libros, bloqueada) |
+| V-011 Unicidad normalizada | OK | `CategoriaUnicidadTest` («matematicas », «MATEMATICAS» y «Matematicas» rechazados al crear y al editar otra; propio nombre válido) |
+| V-012 Layout y `old()` | OK | `GestionLayoutTest` (cabecera/navegación/pie idénticos; errores junto al campo; valores conservados) |
+
+Comprobaciones transversales (9/9 en vivo + `ComprobacionesTransversalesTest`):
+
+- `GET /categorias/1` → 405 y no elimina; `GET` a las rutas `destroy` nunca borra.
+- `/libros/99999/editar` y `/categorias/99999/editar` → 404 en español con el layout común.
+- Ningún formulario expone `name="ejemplares_disponibles"`; crear con total N deja disponibles = N.
+- `@csrf` en todos los formularios de gestión; `@method('DELETE')`/`@method('PUT')` donde corresponde.
+- Título y nombre de categoría con `<script>` se muestran escapados (`&lt;script&gt;`) en listado, ficha y selector.
+
+Cobertura: SC-001…SC-008 verificadas. Suite final: **97 pruebas verdes**
+(41 heredadas de `001`/`002` + 56 de `003`).
