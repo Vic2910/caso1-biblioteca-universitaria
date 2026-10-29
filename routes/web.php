@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\LibroController;
 use App\Models\Categoria;
 use App\Models\Libro;
@@ -30,3 +31,14 @@ Route::post('/libros', [LibroController::class, 'store'])->name('libros.store');
 Route::get('/libros/{libro}/editar', [LibroController::class, 'edit'])->whereNumber('libro')->name('libros.edit');
 Route::put('/libros/{libro}', [LibroController::class, 'update'])->whereNumber('libro')->name('libros.update');
 Route::delete('/libros/{libro}', [LibroController::class, 'destroy'])->whereNumber('libro')->name('libros.destroy');
+
+/*
+ * Gestión de categorías (specs/003-gestion-libros, US3, D-018).
+ * REST propio bajo `/categorias`; la eliminación solo por DELETE.
+ */
+Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
+Route::get('/categorias/crear', [CategoriaController::class, 'create'])->name('categorias.create');
+Route::post('/categorias', [CategoriaController::class, 'store'])->name('categorias.store');
+Route::get('/categorias/{categoria}/editar', [CategoriaController::class, 'edit'])->whereNumber('categoria')->name('categorias.edit');
+Route::put('/categorias/{categoria}', [CategoriaController::class, 'update'])->whereNumber('categoria')->name('categorias.update');
+Route::delete('/categorias/{categoria}', [CategoriaController::class, 'destroy'])->whereNumber('categoria')->name('categorias.destroy');
