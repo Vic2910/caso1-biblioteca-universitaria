@@ -75,6 +75,35 @@ muestra un aviso en español indicando que hay que revisar la configuración de
 conexión en el archivo `.env`. El aviso nunca incluye usuario, contraseña, host
 ni SQL.
 
+## Consulta del catálogo
+
+La navegación común (cabecera) incluye el enlace **«Catálogo»**, que distingue
+visualmente la página activa y funciona en todas las vistas, incluidas las de
+error. La aplicación ofrece dos rutas de consulta, sin autenticación en esta
+fase:
+
+| Método y ruta | Nombre | Contenido |
+|---|---|---|
+| `GET /catalogo` | `catalogo.index` | Listado paginado: 10 libros por página, orden alfabético A–Z por título (ignorando tildes y mayúsculas, con desempate por autor e ISBN), tarjetas completas y clicables con portada o imagen predeterminada |
+| `GET /catalogo/{id}` | `catalogo.show` | Ficha del libro con todos sus campos y su categoría |
+
+- Un libro inexistente o una página fuera de rango (`/catalogo?page=999`,
+  `page=0`, `page=abc`, …) responden **HTTP 404** con una vista personalizada
+  en español («Libro no encontrado» / «Página no válida») y el enlace
+  «Volver al catálogo».
+- Con el catálogo vacío, la página 1 muestra «No hay libros registrados aún»
+  sin tarjetas ni controles de paginación.
+- Los libros sin portada muestran la imagen predeterminada del proyecto
+  (`public/images/libro-sin-portada.svg`); el orden del listado está fijado
+  por una migración de colación (`utf8mb4_0900_ai_ci`, o
+  `utf8mb4_unicode_520_ci` en MariaDB) sobre `libros.titulo` y `libros.autor`.
+
+### Capturas
+
+| Listado (`/catalogo`) | Detalle (`/catalogo/{id}`) |
+|---|---|
+| ![Listado paginado del catálogo](public/images/capturas/catalogo-listado.png) | ![Ficha de detalle de un libro](public/images/capturas/catalogo-detalle.png) |
+
 ## Verificación
 
 ```bash

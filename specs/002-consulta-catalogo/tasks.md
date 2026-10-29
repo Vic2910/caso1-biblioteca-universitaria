@@ -97,11 +97,11 @@ Este repositorio contiene actualmente solo la documentación de `specs/`. La apl
 
 **Purpose**: Validación end-to-end y documentación transversales
 
-- [ ] T020 [P] Ejecutar la validación manual completa de `quickstart.md` (escenarios V-001 a V-008) contra la app con `php artisan serve` y registrar el resultado; verificar los criterios SC-001 a SC-004
-- [ ] T021 Ejecutar `php artisan test` con la suite completa en verde, incluidas las cinco suites de `002` (`CatalogoIndexTest`, `CatalogoDetalleTest`, `CatalogoOrdenYPaginacionTest`, `CatalogoErroresTest`, `CatalogoLayoutTest`) junto con las de `001` (V-009)
-- [ ] T022 [P] Actualizar el README (documentación oficial, G9) con la navegación del catálogo: rutas `GET /catalogo` y `GET /catalogo/{id}`, enlace «Catálogo» en la navegación común, y las capturas de listado y detalle
-- [ ] T023 Revisión de seguridad y limpieza (Principio IV): toda salida escapada con `{{ }}` (incluido `$exception` en `errors/404.blade.php`), solo consultas Eloquent con `with('categoria')`, sin SQL concatenado, sin métodos de escritura ni DELETE por GET, mensajes sin trazas SQL, credenciales ni rutas internas (contracts/user-messages.md §5)
-- [ ] T024 Completar la revisión de `specs/002-consulta-catalogo/checklists/requirements.md` confirmando que cada requisito de `spec.md` (FR-001…FR-005, SC-001…SC-004) tiene evidencia en tests o en la validación del quickstart
+- [X] T020 [P] Ejecutar la validación manual completa de `quickstart.md` (escenarios V-001 a V-008) contra la app con `php artisan serve` y registrar el resultado; verificar los criterios SC-001 a SC-004
+- [X] T021 Ejecutar `php artisan test` con la suite completa en verde, incluidas las cinco suites de `002` (`CatalogoIndexTest`, `CatalogoDetalleTest`, `CatalogoOrdenYPaginacionTest`, `CatalogoErroresTest`, `CatalogoLayoutTest`) junto con las de `001` (V-009)
+- [X] T022 [P] Actualizar el README (documentación oficial, G9) con la navegación del catálogo: rutas `GET /catalogo` y `GET /catalogo/{id}`, enlace «Catálogo» en la navegación común, y las capturas de listado y detalle
+- [X] T023 Revisión de seguridad y limpieza (Principio IV): toda salida escapada con `{{ }}` (incluido `$exception` en `errors/404.blade.php`), solo consultas Eloquent con `with('categoria')`, sin SQL concatenado, sin métodos de escritura ni DELETE por GET, mensajes sin trazas SQL, credenciales ni rutas internas (contracts/user-messages.md §5)
+- [X] T024 Completar la revisión de `specs/002-consulta-catalogo/checklists/requirements.md` confirmando que cada requisito de `spec.md` (FR-001…FR-005, SC-001…SC-004) tiene evidencia en tests o en la validación del quickstart
 
 ---
 
