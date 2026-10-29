@@ -29,3 +29,4 @@ Route::get('/libros/crear', [LibroController::class, 'create'])->name('libros.cr
 Route::post('/libros', [LibroController::class, 'store'])->name('libros.store');
 Route::get('/libros/{libro}/editar', [LibroController::class, 'edit'])->whereNumber('libro')->name('libros.edit');
 Route::put('/libros/{libro}', [LibroController::class, 'update'])->whereNumber('libro')->name('libros.update');
+Route::delete('/libros/{libro}', [LibroController::class, 'destroy'])->whereNumber('libro')->name('libros.destroy');

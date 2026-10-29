@@ -291,6 +291,12 @@
             color: var(--color-primario);
         }
 
+        a.boton.boton-peligro,
+        button.boton.boton-peligro {
+            background-color: #b02a37;
+            border-color: #b02a37;
+        }
+
         .formulario-gestion h2,
         .categorias h2 {
             margin-top: 0;

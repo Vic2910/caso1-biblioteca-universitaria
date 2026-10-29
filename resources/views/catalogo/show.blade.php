@@ -36,6 +36,17 @@
 
         <div class="zona-gestion">
             <a class="boton" href="{{ route('libros.edit', $libro) }}">Editar</a>
+
+            <form method="post" action="{{ route('libros.destroy', $libro) }}"
+                  onsubmit="return confirm('¿Eliminar el libro «{{ $libro->titulo }}»? Esta acción no se puede deshacer.')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="boton boton-peligro">Eliminar</button>
+            </form>
+
+            @if ($libro->prestamos()->exists())
+                <p class="aviso-bloqueo">Este libro tiene préstamos registrados y no puede eliminarse.</p>
+            @endif
         </div>
 
         <p>

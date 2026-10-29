@@ -10,6 +10,7 @@ use App\Models\Categoria;
 use App\Models\Libro;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 
 /**
@@ -77,6 +78,35 @@ class LibroController extends Controller
         return redirect()
             ->route('catalogo.show', $modelo)
             ->with('success', 'Libro actualizado correctamente.');
+    }
+
+    /**
+     * Elimina el libro con las tres capas de D-022 (specs/003-gestion-libros):
+     * comprobación previa de préstamos, respaldo `RESTRICT` de la base de
+     * datos ante carreras, y confirmación previa en el cliente. Solo existe
+     * la ruta DELETE: GET nunca elimina (FR-005, SC-003).
+     */
+    public function destroy(string $libro): RedirectResponse
+    {
+        $modelo = $this->resolverLibro($libro);
+
+        if ($modelo->prestamos()->exists()) {
+            return redirect()
+                ->route('catalogo.index')
+                ->with('error', 'El libro tiene préstamos registrados y no puede eliminarse.');
+        }
+
+        try {
+            $modelo->delete();
+        } catch (QueryException) {
+            return redirect()
+                ->route('catalogo.index')
+                ->with('error', 'No se pudo eliminar el registro. Inténtelo de nuevo.');
+        }
+
+        return redirect()
+            ->route('catalogo.index')
+            ->with('success', 'Libro eliminado correctamente.');
     }
 
     /**
