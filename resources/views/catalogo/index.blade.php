@@ -4,7 +4,10 @@
 
 @section('content')
     <section class="catalogo">
-        <h2>Catálogo de libros</h2>
+        <div class="cabecera-seccion">
+            <h2>Catálogo de libros</h2>
+            <a class="boton" href="{{ route('libros.create') }}">Nuevo libro</a>
+        </div>
 
         @if ($libros->total() === 0)
             <p class="estado-vacio">No hay libros registrados aún</p>

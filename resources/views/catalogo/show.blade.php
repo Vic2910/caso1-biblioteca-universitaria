@@ -34,6 +34,10 @@
             <dd>{{ $libro->categoria->nombre }}</dd>
         </dl>
 
+        <div class="zona-gestion">
+            <a class="boton" href="{{ route('libros.edit', $libro) }}">Editar</a>
+        </div>
+
         <p>
             <a href="{{ route('catalogo.index') }}">Volver al catálogo</a>
         </p>

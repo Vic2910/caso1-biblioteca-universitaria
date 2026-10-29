@@ -230,6 +230,154 @@
         dl.ficha-campos dd {
             margin: 0;
         }
+
+        .mensaje-exito,
+        .mensaje-error {
+            border-radius: 4px;
+            padding: 0.85rem 1.25rem;
+            margin: 0 0 1.25rem;
+            border: 1px solid var(--color-borde);
+            background-color: #ffffff;
+        }
+
+        .mensaje-exito {
+            border-left: 4px solid #1e7e34;
+            color: #1e7e34;
+        }
+
+        .mensaje-error {
+            border-left: 4px solid #b02a37;
+            color: #b02a37;
+        }
+
+        .mensaje-error ul {
+            margin: 0.5rem 0 0;
+            padding-left: 1.25rem;
+        }
+
+        .cabecera-seccion {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .cabecera-seccion h2 {
+            margin-top: 0;
+            color: var(--color-primario);
+        }
+
+        a.boton,
+        button.boton {
+            display: inline-block;
+            background-color: var(--color-primario);
+            color: #ffffff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 4px;
+            border: 1px solid var(--color-primario);
+            text-decoration: none;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        a.boton:hover,
+        button.boton:hover {
+            filter: brightness(1.12);
+        }
+
+        a.boton.boton-secundario {
+            background-color: #ffffff;
+            color: var(--color-primario);
+        }
+
+        .formulario-gestion h2,
+        .categorias h2 {
+            margin-top: 0;
+            color: var(--color-primario);
+        }
+
+        .campo-formulario {
+            margin-bottom: 1rem;
+        }
+
+        .campo-formulario label {
+            display: block;
+            font-weight: bold;
+            color: var(--color-primario);
+            margin-bottom: 0.25rem;
+        }
+
+        .campo-formulario input:not([type="file"]),
+        .campo-formulario .entrada-categoria {
+            width: 100%;
+            max-width: 28rem;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--color-borde);
+            border-radius: 4px;
+            background-color: #ffffff;
+            font: inherit;
+        }
+
+        .campo-formulario .error-campo {
+            color: #b02a37;
+            margin: 0.3rem 0 0;
+            font-size: 0.9rem;
+        }
+
+        .campo-formulario .ayuda-campo {
+            color: #6c757d;
+            margin: 0.3rem 0 0;
+            font-size: 0.85rem;
+        }
+
+        .acciones-formulario {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-top: 1.25rem;
+        }
+
+        .zona-gestion {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .zona-gestion form {
+            margin: 0;
+        }
+
+        .aviso-bloqueo {
+            color: #b02a37;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        table.tabla-gestion {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border: 1px solid var(--color-borde);
+            border-radius: 6px;
+        }
+
+        table.tabla-gestion th,
+        table.tabla-gestion td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--color-borde);
+            text-align: left;
+        }
+
+        table.tabla-gestion th {
+            color: var(--color-primario);
+        }
+
+        table.tabla-gestion tr:last-child td {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -249,6 +397,25 @@
     </header>
 
     <main class="site-main">
+        @if (session('success'))
+            <div class="mensaje-exito" role="status">{{ session('success') }}</div>
+        @endif
+
+        @if (session('error'))
+            <div class="mensaje-error" role="alert">{{ session('error') }}</div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mensaje-error" role="alert">
+                <p>Se han detectado errores en el formulario:</p>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @yield('content')
     </main>
 

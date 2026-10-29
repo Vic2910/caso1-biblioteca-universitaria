@@ -28,7 +28,14 @@ cp .env.example .env                # 2. crear el archivo local de configuració
 # 3. editar .env y completar los datos de conexión (ver abajo)
 php artisan key:generate            # 4. generar la APP_KEY
 php artisan migrate --seed          # 5. crear el esquema y cargar los datos de prueba
+php artisan storage:link            # 6. enlace simbólico para servir las portadas subidas
 ```
+
+El comando `php artisan storage:link` crea el enlace
+`public/storage` → `storage/app/public`, de modo que los archivos subidos al
+disco público (por ejemplo, las portadas de los libros en
+`storage/app/public/portadas`) se sirvan por HTTP desde la aplicación. Es
+necesario ejecutarlo una sola vez por instalación, después de `key:generate`.
 
 ### Configuración de conexión (`.env`)
 
