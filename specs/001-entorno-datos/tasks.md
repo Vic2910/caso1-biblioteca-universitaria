@@ -82,8 +82,8 @@ description: "Task list for 001-entorno-datos (Entorno y base de datos)"
 - [X] T021 [P] [US1] Create `resources/views/errors/conexion.blade.php` (extends `resources/views/layouts/app.blade.php`): Spanish notice containing (a) «no se pudo conectar con la base de datos», (b) «revise la configuración de conexión en el archivo `.env`», (c) **no** user, password, host nor SQL — verbatim contract `contracts/user-messages.md` §1 (FR-008, SC-004)
 - [X] T022 [US1] Configure connection-failure handling in `bootstrap/app.php` (`withExceptions`) plus `app/Exceptions/` so `PDOException`/`QueryException` of access denial, missing host or unavailable database renders `errors.conexion` in Spanish and blocks every data view, without leaking credentials or SQL (research D-006, FR-008) (depends on T021)
 - [X] T023 [US1] Complete `resources/views/welcome.blade.php` (extends `resources/views/layouts/app.blade.php`, output escaped with `{{ }}`) and wire `routes/web.php` so `GET /` proves the database connection (depends on T005, T006, T022)
-- [ ] T024 [US1] Write `README.md` in Spanish with: prerequisites (PHP >= 8.3, Composer 2.x, MySQL 8, Git), install steps of `contracts/cli-commands.md` (`composer install`, `cp .env.example .env`, editar `.env`, `php artisan key:generate`, `php artisan migrate --seed`), creation of the `biblioteca` database, chosen engine MySQL 8 with MariaDB/PostgreSQL variant note (FR-005, D-002), ER diagram of `data-model.md`, and the single start command `php artisan serve` → `http://127.0.0.1:8000` (FR-001, D-009, SC-003)
-- [ ] T025 [US1] Validate User Story 1 end to end per `quickstart.md`: `php artisan migrate:status`, `php artisan migrate:rollback && php artisan migrate`, `php artisan migrate:fresh --seed` (V-002/V-003/V-004 checks via tinker), `php artisan serve` following only `README.md` (V-001), wrong-credentials run showing `resources/views/errors/conexion.blade.php` (V-005), `git ls-files` without `.env` (V-007), and `php artisan test` green (V-008)
+- [X] T024 [US1] Write `README.md` in Spanish with: prerequisites (PHP >= 8.3, Composer 2.x, MySQL 8, Git), install steps of `contracts/cli-commands.md` (`composer install`, `cp .env.example .env`, editar `.env`, `php artisan key:generate`, `php artisan migrate --seed`), creation of the `biblioteca` database, chosen engine MySQL 8 with MariaDB/PostgreSQL variant note (FR-005, D-002), ER diagram of `data-model.md`, and the single start command `php artisan serve` → `http://127.0.0.1:8000` (FR-001, D-009, SC-003)
+- [X] T025 [US1] Validate User Story 1 end to end per `quickstart.md`: `php artisan migrate:status`, `php artisan migrate:rollback && php artisan migrate`, `php artisan migrate:fresh --seed` (V-002/V-003/V-004 checks via tinker), `php artisan serve` following only `README.md` (V-001), wrong-credentials run showing `resources/views/errors/conexion.blade.php` (V-005), `git ls-files` without `.env` (V-007), and `php artisan test` green (V-008) — validated 2026-10-28: all checks green (see Notes «Registro de validación V-001…V-008»)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently (MVP)
 
@@ -106,8 +106,8 @@ description: "Task list for 001-entorno-datos (Entorno y base de datos)"
 ### Implementation for User Story 2
 
 - [X] T027 [US2] Implement `app/Services/EliminacionService.php` with the app-side pre-check required by `data-model.md` §Reglas de eliminación documentadas: `eliminarCategoria()` blocks while `libros` exist and `eliminarLibro()` blocks while `prestamos` exist, exposing the Spanish messages of `contracts/user-messages.md` §2; the `restrictOnDelete()` FKs (D-004) remain as database backstop (depends on T010–T015 schema/models and T026)
-- [ ] T028 [US2] Add the section «Eliminación de registros relacionados» to `README.md` in Spanish documenting the table of `data-model.md` §Reglas de eliminación documentadas: categoría con libros → bloqueada (aviso de libros asociados), libro con préstamos → bloqueada (aviso de préstamos asociados), sin registros relacionados → eliminación correcta, siempre mediante `DELETE` con confirmación, nunca GET (Principio IV, FR-006, SC-005)
-- [ ] T029 [US2] Validate User Story 2 per quickstart V-006: run `php artisan test` with `tests/Feature/EliminacionRelacionadaTest.php` green, perform the four controlled deletion attempts (2 blocked, 2 successful) and confirm `README.md` explains the behavior in Spanish
+- [X] T028 [US2] Add the section «Eliminación de registros relacionados» to `README.md` in Spanish documenting the table of `data-model.md` §Reglas de eliminación documentadas: categoría con libros → bloqueada (aviso de libros asociados), libro con préstamos → bloqueada (aviso de préstamos asociados), sin registros relacionados → eliminación correcta, siempre mediante `DELETE` con confirmación, nunca GET (Principio IV, FR-006, SC-005)
+- [X] T029 [US2] Validate User Story 2 per quickstart V-006: run `php artisan test` with `tests/Feature/EliminacionRelacionadaTest.php` green (6/6), perform the four controlled deletion attempts (2 blocked, 2 successful) and confirm `README.md` explains the behavior in Spanish (section «Eliminación de registros relacionados» present) — validated 2026-10-28
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -117,10 +117,10 @@ description: "Task list for 001-entorno-datos (Entorno y base de datos)"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T030 [P] Execute every scenario V-001 to V-008 of `specs/001-entorno-datos/quickstart.md` in a clean environment and record the results (SC-001 to SC-005 coverage)
-- [ ] T031 [P] Review `README.md` against FR-001 (único comando de inicio `php artisan serve`), FR-005 (motor elegido documentado), FR-006 (sección «Eliminación de registros relacionados») and `contracts/user-messages.md` (todos los mensajes visibles en español, sin credenciales)
-- [ ] T032 [P] Final security sweep: `git ls-files` has no `.env`, grep of `app/`, `database/`, `resources/`, `routes/`, `tests/` and `README.md` shows no credentials or concatenated SQL (FR-007, Principio IV), Eloquent/Query Builder used everywhere (D-006/D-007)
-- [ ] T033 Run `php artisan test` one last time, clean up code, and commit all remaining changes with Conventional Commits on `feature/entorno-datos` (constitution «Flujo de desarrollo», plan.md G9)
+- [X] T030 [P] Execute every scenario V-001 to V-008 of `specs/001-entorno-datos/quickstart.md` in a clean environment and record the results (SC-001 to SC-005 coverage) — results recorded in Notes «Registro de validación V-001…V-008»
+- [X] T031 [P] Review `README.md` against FR-001 (único comando de inicio `php artisan serve`), FR-005 (motor elegido documentado), FR-006 (sección «Eliminación de registros relacionados») y `contracts/user-messages.md` (todos los mensajes visibles en español, sin credenciales) — PASS: §Comando de inicio (único, `php artisan serve`), §Requisitos previos (MySQL 8 + variantes MariaDB/PostgreSQL), §Eliminación de registros relacionados (tabla con los 4 casos + «DELETE nunca GET»), avisos en español sin credenciales
+- [X] T032 [P] Final security sweep: `git ls-files` has no `.env`, grep of `app/`, `database/`, `resources/`, `routes/`, `tests/` and `README.md` shows no credentials or concatenated SQL (FR-007, Principio IV), Eloquent/Query Builder used everywhere (D-006/D-007) — PASS: solo `.env.example` trackeado (`DB_PASSWORD=` y `APP_KEY=` vacíos), `.env` en `.gitignore`; sin credenciales ni SQL concatenado con entrada de usuario en código de la aplicación; las únicas consultas `DB::select` son introspección estática de `information_schema` en `tests/Feature/MigracionesYSemillaTest.php` (sin interpolación); portadas de vistas compiladas obsoletas limpiadas con `view:clear`
+- [X] T033 Run `php artisan test` one last time, clean up code, and commit all remaining changes with Conventional Commits on `feature/entorno-datos` (constitution «Flujo de desarrollo», plan.md G9)
 
 ---
 
@@ -231,3 +231,20 @@ With multiple developers:
 - Commit after each task or logical group with Conventional Commits (branch `feature/entorno-datos`)
 - Stop at any checkpoint to validate the story independently
 - Avoid: vague tasks, same-file conflicts, cross-story dependencies that break independence
+
+## Registro de validación V-001…V-008 (2026-10-28)
+
+Ejecutado en entorno local limpio (`migrate:fresh --seed`, MySQL 8 en `127.0.0.1:3306`, PHP 8.4):
+
+| Escenario | Resultado | Evidencia |
+|---|---|---|
+| V-001 Arranque por README | ✅ | `php artisan serve` → `GET http://127.0.0.1:8000` = 200; el `main` muestra «Conexión a la base de datos verificada» con datos en vivo (16 libros, 3 categorías, 3 préstamos) |
+| V-002 Esquema versionado | ✅ | `migrate:status` = 6/6 «Ran»; `migrate:rollback` + `migrate` sin errores; FK `restrictOnDelete()` en ambas migraciones y bloqueo `RESTRICT` comprobado en BD (error 1451 en borrado directo); índices únicos `libros_isbn_unique` y `categorias_nombre_unique` (`Non_unique=0`) |
+| V-003 Datos de prueba | ✅ | 3 categorías, 16 libros (≥15), exactamente 3 préstamos (`activo`/`devuelto`/`vencido`), `portada` NULL en el 100 %, invariante `disponibles = totales − activos` = `true` en el 100 % |
+| V-004 Relaciones | ✅ | 0 libros sin categoría, 0 préstamos sin libro; relaciones Eloquent `Libro→Categoria` y `Prestamo→Libro` resuelven |
+| V-005 Fallo de conexión | ✅ | Con `DB_USERNAME` inválido: HTTP 500 con `errors.conexion` en español («no se pudo conectar… revise la configuración… `.env`»); sin usuario, contraseña, host ni SQL en la respuesta; restaurado `.env` → 200 con normalidad |
+| V-006 Eliminación | ✅ | App: 2 intentos bloqueados con los mensajes en español del contrato + 2 exitosos (temporales, semilla intacta); BD: borrado directo de categoría con libros y libro con préstamos bloqueado por `RESTRICT`; README lo documenta |
+| V-007 Credenciales fuera del repo | ✅ | `git ls-files` solo contiene `.env.example` (`DB_PASSWORD=`, `APP_KEY=` vacíos); `git check-ignore .env` confirma ignorado; cambios en `.env` no tocan archivos versionados |
+| V-008 Pruebas automatizadas | ✅ | `php artisan test` = 21/21 en verde (103 aserciones), `EliminacionRelacionadaTest` 6/6 |
+
+**Cobertura SC**: SC-001→V-004, SC-002→V-003, SC-003→V-001, SC-004→V-005, SC-005→V-006 — todas cubiertas.
