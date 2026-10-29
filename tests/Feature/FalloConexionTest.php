@@ -87,10 +87,16 @@ class FalloConexionTest extends TestCase
 
     /**
      * La aplicación no continúa: ninguna vista de datos se sirve.
+     *
+     * El marcado de tarjetas del catálogo sustituye a la palabra «Catálogo»
+     * como centinela: desde 002-consulta-catalogo el enlace de navegación
+     * «Catálogo» forma parte del layout común y aparece también en las vistas
+     * de error (FR-004), sin que por ello se sirva ninguna vista de datos.
      */
     private function assertNoSirveVistaDeDatos(string $contenido): void
     {
         $this->assertStringNotContainsString('Conexión a la base de datos verificada', $contenido);
-        $this->assertStringNotContainsString('Catálogo', $contenido);
+        $this->assertStringNotContainsString('<a class="tarjeta-libro"', $contenido);
+        $this->assertStringNotContainsString('No hay libros registrados aún', $contenido);
     }
 }
