@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\RegistrarPrestamoRequest;
+use App\Models\Libro;
+use App\Services\Prestamos\PrestamoService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
+
+/**
+ * Préstamos (specs/004-gestion-prestamos, D-018): registrar, consultar y
+ * devolver. Controlador delgado (Principio III): toda regla de préstamo vive
+ * en `PrestamoService` (D-019) y la validación en Form Requests (D-021).
+ * No existen acciones de edición ni eliminación: el historial es inmutable
+ * (FR-007).
+ */
+class PrestamoController extends Controller
+{
+    /**
+     * Préstamos por página del listado (D-024).
+     */
+    private const PRESTAMOS_POR_PAGINA = 10;
+
+    public function __construct(private readonly PrestamoService $prestamos) {}
+
+    /**
+     * Formulario de registro con el selector de libros (incluidos los
+     * agotados, D-027) y la fecha de préstamo por defecto de hoy.
+     */
+    public function create(): View
+    {
+        return view('prestamos.create', [
+            'libros' => $this->libros(),
+            'fechaPrestamo' => today()->format('Y-m-d'),
+        ]);
+    }
+
+    /**
+     * Registra el préstamo validado y redirige al listado con mensaje de
+     * éxito (D-018). Los rechazos de carrera que llegan del servicio vuelven
+     * al formulario con el error junto al campo (SC-002).
+     */
+    public function store(RegistrarPrestamoRequest $request): RedirectResponse
+    {
+        $this->prestamos->registrar($request->validated());
+
+        $this->prestamos->sincronizarVencidos();
+
+        return redirect()
+            ->route('prestamos.index')
+            ->with('success', 'Préstamo registrado correctamente.');
+    }
+
+    /**
+     * Libros ordenados por título para el selector del formulario.
+     *
+     * @return Collection<int, Libro>
+     */
+    private function libros(): Collection
+    {
+        return Libro::query()->orderBy('titulo')->get();
+    }
+}
