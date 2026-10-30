@@ -384,6 +384,33 @@
         table.tabla-gestion tr:last-child td {
             border-bottom: none;
         }
+
+        span.etiqueta-estado {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        span.etiqueta-estado.estado-activo {
+            background-color: #cfe2ff;
+            color: #084298;
+            border: 1px solid #9ec5fe;
+        }
+
+        span.etiqueta-estado.estado-vencido {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        span.etiqueta-estado.estado-devuelto {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #a3cfbb;
+        }
     </style>
 </head>
 <body>

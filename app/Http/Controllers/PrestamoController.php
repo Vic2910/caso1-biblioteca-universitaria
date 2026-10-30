@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DevolverPrestamoRequest;
 use App\Http\Requests\RegistrarPrestamoRequest;
 use App\Models\Libro;
+use App\Models\Prestamo;
 use App\Services\Prestamos\PrestamoService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -56,6 +58,38 @@ class PrestamoController extends Controller
     }
 
     /**
+     * Formulario de devolución con el resumen del préstamo; el estado se
+     * sincroniza antes de mostrarlo (D-020). Préstamo inexistente → 404 en
+     * español con la vista compartida de `002` (D-018).
+     */
+    public function devolver(string $id): View
+    {
+        $prestamo = $this->resolverPrestamo($id);
+
+        $this->prestamos->sincronizarVencidos();
+
+        return view('prestamos.devolucion', ['prestamo' => $prestamo->fresh()]);
+    }
+
+    /**
+     * Registra la devolución validada y redirige al listado con mensaje de
+     * éxito (D-018). Un préstamo ya devuelto vuelve al formulario con el
+     * error M2 junto a la acción, sin tocar la disponibilidad (SC-001).
+     */
+    public function registrarDevolucion(DevolverPrestamoRequest $request, string $id): RedirectResponse
+    {
+        $prestamo = $this->resolverPrestamo($id);
+
+        $this->prestamos->devolver($prestamo, (string) $request->validated()['fecha_devolucion_real']);
+
+        $this->prestamos->sincronizarVencidos();
+
+        return redirect()
+            ->route('prestamos.index')
+            ->with('success', 'Devolución registrada correctamente.');
+    }
+
+    /**
      * Libros ordenados por título para el selector del formulario.
      *
      * @return Collection<int, Libro>
@@ -63,5 +97,20 @@ class PrestamoController extends Controller
     private function libros(): Collection
     {
         return Libro::query()->orderBy('titulo')->get();
+    }
+
+    /**
+     * Resuelve el préstamo por su id numérico o responde 404 en español con
+     * la vista compartida de `002` (mecanismo D-013, D-018).
+     */
+    private function resolverPrestamo(string $id): Prestamo
+    {
+        $prestamo = Prestamo::find($id);
+
+        if ($prestamo === null) {
+            abort(404, 'Préstamo no encontrado');
+        }
+
+        return $prestamo;
     }
 }
