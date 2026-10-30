@@ -1,10 +1,11 @@
-# Biblioteca Universitaria — Gestión de libros y catálogo
+# Biblioteca Universitaria — Gestión de libros, catálogo y préstamos
 
 Aplicación web local para la gestión de una biblioteca universitaria, construida
 con **Laravel 13** (PHP >= 8.3) y una base de datos relacional. La base queda
 lista con esquema versionado con migraciones y datos de prueba; sobre ella se
-ofrece la consulta del catálogo y el **CRUD de libros y categorías** con
-validación y mensajes en español.
+ofrece la consulta del catálogo, el **CRUD de libros y categorías** y el
+**registro, consulta y devolución de préstamos**, con validación y mensajes en
+español.
 
 ## Requisitos previos
 
@@ -85,10 +86,10 @@ ni SQL.
 
 ## Consulta del catálogo
 
-La navegación común (cabecera) incluye los enlaces **«Catálogo»** y
-**«Categorías»**, que distinguen visualmente la página activa y funcionan en
-todas las vistas, incluidas las de error. La consulta del catálogo ofrece dos
-rutas, sin autenticación en esta fase:
+La navegación común (cabecera) incluye los enlaces **«Catálogo»**,
+**«Préstamos»** y **«Categorías»**, que distinguen visualmente la página activa
+y funcionan en todas las vistas, incluidas las de error. La consulta del
+catálogo ofrece dos rutas, sin autenticación en esta fase:
 
 | Método y ruta | Nombre | Contenido |
 |---|---|---|
@@ -190,6 +191,60 @@ previa, respaldo `RESTRICT` de la base de datos y confirmación del usuario.
 |---|---|
 | ![Listado de categorías con libros asociados](public/images/capturas/categorias-listado.png) | ![Formulario de una categoría](public/images/capturas/categorias-crear.png) ![Edición de una categoría](public/images/capturas/categorias-editar.png) |
 
+## Gestión de préstamos
+
+La aplicación registra préstamos a estudiantes, consulta su historial paginado
+y registra las devoluciones. Las reglas de negocio viven en un único servicio
+(`app/Services/Prestamos/PrestamoService.php`), la validación en Form
+Requests y el controlador es un encargado delgado. Los mensajes de validación
+aparecen **junto al campo** y lo escrito se conserva (`old()`).
+
+| Método y ruta | Nombre | Contenido |
+|---|---|---|
+| `GET /prestamos` | `prestamos.index` | Listado paginado: 10 préstamos por página, orden `fecha_prestamo` DESC → `id` DESC |
+| `GET /prestamos/crear` | `prestamos.create` | Formulario de registro (selector de libros, incluidos los agotados; fecha de préstamo por defecto: hoy) |
+| `POST /prestamos` | `prestamos.store` | Registro validado |
+| `GET /prestamos/{id}/devolver` | `prestamos.form-devolucion` | Formulario de devolución con el resumen del préstamo |
+| `POST /prestamos/{id}/devolver` | `prestamos.devolver` | Devolución validada |
+
+### Reglas de préstamo
+
+- **Disponibilidad exacta**: registrar un préstamo descuenta **exactamente un**
+  ejemplar disponible; devolverlo lo suma **exactamente una vez**. La
+  disponibilidad nunca queda negativa.
+- **Sin disponibilidad**: prestar un libro con `disponibles: 0` se rechaza con
+  «No hay ejemplares disponibles de este libro.» junto al campo Libro. El
+  registro y la devolución son **atómicos** (transacción con bloqueo de fila):
+  dos peticiones simultáneas por el último ejemplar no pueden dejar
+  disponibilidad negativa.
+- **Límite por estudiante**: un carné (comparado sin espacios sobrantes) no
+  puede tener más de **tres préstamos sin devolver**; los `vencido` cuentan
+  como no devueltos. Tras devolver uno, la plaza liberada vuelve a contar.
+- **Estado vencido calculado**: el estado `vencido` se deriva de la fecha (no
+  se elige al registrar): un préstamo sin devolver cuya devolución prevista sea
+  **estrictamente anterior a hoy** pasa a `vencido` **desde el día siguiente**
+  (con prevista = hoy sigue `activo`). La transición se aplica automáticamente
+  al registrar, al devolver y al listar, sin intervención manual; los
+  préstamos `devuelto` **jamás** cambian de estado.
+- **Historial inmutable**: solo existen registrar, consultar y devolver. **No**
+  hay rutas `PUT`/`PATCH`/`DELETE` de préstamos ni vistas de edición o
+  eliminación: un préstamo ya registrado no puede alterarse salvo por su
+  devolución. Un intento con esos verbos responde 404/405.
+- **Devolución**: la fecha real es obligatoria y nunca anterior a la fecha de
+  préstamo. Repetir la devolución de un préstamo ya `devuelto` se rechaza con
+  «Este préstamo ya fue devuelto.» sin volver a sumar ejemplares. Un préstamo
+  `vencido` sí puede devolverse con normalidad.
+
+### Capturas de préstamos
+
+| Listado (`/prestamos`) | Registro (`/prestamos/crear`) |
+|---|---|
+| ![Listado paginado de préstamos con estados y acción de devolución](public/images/capturas/prestamos-listado.png) | ![Formulario de registro de un préstamo](public/images/capturas/prestamos-crear.png) |
+
+| Devolución (`/prestamos/{id}/devolver`) |
+|---|
+| ![Formulario de devolución con el resumen del préstamo](public/images/capturas/prestamos-devolucion.png) |
+
 ## Verificación
 
 ```bash
@@ -232,15 +287,15 @@ capas de confirmación está en «Eliminaciones con confirmación», más arriba
 ## Estructura del proyecto
 
 ```text
-app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController
-app/Http/Requests/      # LibroStoreRequest, LibroUpdateRequest, CategoriaStoreRequest…
+app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController, PrestamoController
+app/Http/Requests/      # LibroStoreRequest, CategoriaStoreRequest, RegistrarPrestamoRequest…
 app/Models/             # Categoría, Libro y Prestamo (Eloquent)
-app/Services/           # EliminacionService (comprobación previa de borrado)
+app/Services/           # EliminacionService y Prestamos/PrestamoService (reglas de préstamo)
 app/Exceptions/         # FalloConexion (aviso en español ante error de BD)
 lang/es/                # mensajes de validación en español
 database/migrations/    # única fuente del esquema
 database/factories/     # datos de prueba deterministas
 database/seeders/       # CatalogoSeeder (3 categorías, 16 libros, 3 préstamos)
-resources/views/        # layout común, catálogo, libros, categorías y errores
-tests/Feature/          # pruebas de catálogo, gestión y casos heredados de la Fase 1
+resources/views/        # layout común, catálogo, libros, categorías, préstamos y errores
+tests/Feature/          # pruebas de catálogo, gestión, préstamos y casos heredados de la Fase 1
 ```
