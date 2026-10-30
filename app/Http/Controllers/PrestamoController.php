@@ -30,6 +30,25 @@ class PrestamoController extends Controller
     public function __construct(private readonly PrestamoService $prestamos) {}
 
     /**
+     * Listado paginado de todos los préstamos, más recientes primero. El
+     * estado se sincroniza antes de listar para no mostrar vencidos
+     * desactualizados (D-020).
+     */
+    public function index(): View
+    {
+        $this->prestamos->sincronizarVencidos();
+
+        $prestamos = Prestamo::query()
+            ->with('libro')
+            ->orderByDesc('fecha_prestamo')
+            ->orderByDesc('id')
+            ->paginate(self::PRESTAMOS_POR_PAGINA)
+            ->withQueryString();
+
+        return view('prestamos.index', ['prestamos' => $prestamos]);
+    }
+
+    /**
      * Formulario de registro con el selector de libros (incluidos los
      * agotados, D-027) y la fecha de préstamo por defecto de hoy.
      */
