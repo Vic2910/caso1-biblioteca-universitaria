@@ -16,6 +16,14 @@ use Illuminate\Validation\Validator;
  * en el campo correcto sin duplicar lógica (R1 disponibilidad sobre
  * `libro_id`, R2 límite de tres sobre `carnet_estudiante`). El carné se
  * normaliza con `trim()` exclusivo antes de validar (D-023).
+ *
+ * [CONCEPTO] Reglas de préstamo visibles en este formulario:
+ *  - Un libro sin disponibilidad se rechaza junto al campo Libro («No hay
+ *    ejemplares disponibles de este libro.»); la disponibilidad nunca baja
+ *    de cero.
+ *  - Un estudiante no puede superar tres préstamos sin devolver (los
+ *    `vencido` cuentan); el rechazo aparece junto al carné.
+ *  - La devolución prevista debe ser posterior a la fecha de préstamo.
  */
 class RegistrarPrestamoRequest extends FormRequest
 {

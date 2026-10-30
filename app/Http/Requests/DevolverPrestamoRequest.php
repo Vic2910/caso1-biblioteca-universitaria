@@ -15,6 +15,12 @@ use Illuminate\Validation\Validator;
  * de préstamo del registro en curso (R4). La comparación cruza la entrada y
  * un registro existente, por lo que se evalúa en `withValidator()` contra el
  * modelo (D-021). Mensajes en español del contrato user-messages.md §3.
+ *
+ * [CONCEPTO] Reglas de préstamo visibles en este formulario:
+ *  - La fecha de devolución real es obligatoria y nunca anterior a la fecha
+ *    de préstamo; un préstamo vencido también puede devolverse.
+ *  - Un préstamo ya devuelto no admite una segunda devolución (M2); la
+ *    disponibilidad del libro se suma exactamente una vez.
  */
 class DevolverPrestamoRequest extends FormRequest
 {

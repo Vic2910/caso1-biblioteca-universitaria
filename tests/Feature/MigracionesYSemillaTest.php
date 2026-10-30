@@ -21,6 +21,20 @@ use Tests\TestCase;
  */
 class MigracionesYSemillaTest extends TestCase
 {
+    /**
+     * Esta clase ejecuta `migrate:fresh` (con y sin `--seed`) fuera de
+     * transacción, lo que deja el esquema sembrado comprometido en la base
+     * de pruebas. Al terminar cada prueba se restaura el esquema migrado y
+     * vacío para que las suites posteriores del mismo proceso (que corren
+     * con transacciones sobre este esquema) no vean la semilla.
+     */
+    protected function tearDown(): void
+    {
+        $this->artisan('migrate:fresh', ['--no-interaction' => true])->run();
+
+        parent::tearDown();
+    }
+
     public function test_las_migraciones_estan_completamente_ejecutadas(): void
     {
         $this->artisan('migrate:fresh', ['--no-interaction' => true])->assertSuccessful();

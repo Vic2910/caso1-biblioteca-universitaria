@@ -126,11 +126,11 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Mejoras y validación transversales a todas las historias
 
-- [ ] T023 [P] Crear `tests/Feature/PrestamoVencimientoTest.php` (D-025): un préstamo con `fecha_devolucion_prevista` = hoy sigue `activo`; con prevista = ayer pasa a `vencido` **sin intervención manual**; el estado se evalúa al **registrar**, al **devolver** y al **listar**; los `devuelto` jamás cambian (V-011, FR-002, data-model.md §Transiciones de estado)
-- [ ] T024 [P] Verificar la inmutabilidad FR-007 en `routes/web.php`: no existe ninguna ruta `PUT`/`PATCH`/`DELETE` de préstamos ni vistas de edición/eliminación; cualquier modificación externa queda fuera de alcance (V-012)
-- [ ] T025 Ejecutar la suite completa `php artisan test` en la raíz del proyecto y validar los escenarios manuales V-001…V-013 de `specs/004-gestion-prestamos/quickstart.md`; corregir cualquier regresión (las 5 suites de `004` deben estar en verde junto con las de `001` y `002`, V-014)
-- [ ] T026 [P] Actualizar `README.md` (documentación oficial, gate G9): documentar el flujo de préstamos, las reglas (límite de 3 no devueltos contando vencidos, vencido desde el día siguiente, disponibilidad ±1 exacta, inmutabilidad), las 5 rutas y añadir las capturas de listado, registro y devolución
-- [ ] T027 [P] Añadir los comentarios `[CONCEPTO]` que documentan las reglas de préstamo en `app/Services/Prestamos/PrestamoService.php` y los formularios nuevos, siguiendo la convención de `001`/`002` (constitución v1.0, §Flujo de desarrollo)
+- [X] T023 [P] Crear `tests/Feature/PrestamoVencimientoTest.php` (D-025): un préstamo con `fecha_devolucion_prevista` = hoy sigue `activo`; con prevista = ayer pasa a `vencido` **sin intervención manual**; el estado se evalúa al **registrar**, al **devolver** y al **listar**; los `devuelto` jamás cambian (V-011, FR-002, data-model.md §Transiciones de estado)
+- [X] T024 [P] Verificar la inmutabilidad FR-007 en `routes/web.php`: no existe ninguna ruta `PUT`/`PATCH`/`DELETE` de préstamos ni vistas de edición/eliminación; cualquier modificación externa queda fuera de alcance (V-012)
+- [X] T025 Ejecutar la suite completa `php artisan test` en la raíz del proyecto y validar los escenarios manuales V-001…V-013 de `specs/004-gestion-prestamos/quickstart.md`; corregir cualquier regresión (las 5 suites de `004` deben estar en verde junto con las de `001` y `002`, V-014)
+- [X] T026 [P] Actualizar `README.md` (documentación oficial, gate G9): documentar el flujo de préstamos, las reglas (límite de 3 no devueltos contando vencidos, vencido desde el día siguiente, disponibilidad ±1 exacta, inmutabilidad), las 5 rutas y añadir las capturas de listado, registro y devolución
+- [X] T027 [P] Añadir los comentarios `[CONCEPTO]` que documentan las reglas de préstamo en `app/Services/Prestamos/PrestamoService.php` y los formularios nuevos, siguiendo la convención de `001`/`002` (constitución v1.0, §Flujo de desarrollo)
 
 ---
 
