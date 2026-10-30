@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\LibroController;
+use App\Http\Controllers\PrestamoController;
 use App\Models\Categoria;
 use App\Models\Libro;
 use App\Models\Prestamo;
@@ -42,3 +43,14 @@ Route::post('/categorias', [CategoriaController::class, 'store'])->name('categor
 Route::get('/categorias/{categoria}/editar', [CategoriaController::class, 'edit'])->whereNumber('categoria')->name('categorias.edit');
 Route::put('/categorias/{categoria}', [CategoriaController::class, 'update'])->whereNumber('categoria')->name('categorias.update');
 Route::delete('/categorias/{categoria}', [CategoriaController::class, 'destroy'])->whereNumber('categoria')->name('categorias.destroy');
+
+/*
+ * Gestión de préstamos (specs/004-gestion-prestamos, D-018).
+ * Solo registrar, consultar y devolver: NO existen rutas PUT/PATCH/DELETE
+ * de préstamos porque el historial es inmutable (FR-007).
+ */
+Route::get('/prestamos', [PrestamoController::class, 'index'])->name('prestamos.index');
+Route::get('/prestamos/crear', [PrestamoController::class, 'create'])->name('prestamos.create');
+Route::post('/prestamos', [PrestamoController::class, 'store'])->name('prestamos.store');
+Route::get('/prestamos/{id}/devolver', [PrestamoController::class, 'devolver'])->whereNumber('id')->name('prestamos.form-devolucion');
+Route::post('/prestamos/{id}/devolver', [PrestamoController::class, 'registrarDevolucion'])->whereNumber('id')->name('prestamos.devolver');

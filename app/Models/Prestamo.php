@@ -65,4 +65,21 @@ class Prestamo extends Model
     {
         return $query->where('estado', self::ESTADO_ACTIVO);
     }
+
+    /**
+     * Indica si el préstamo ya fue devuelto (estado final, D-020).
+     */
+    public function devuelto(): bool
+    {
+        return $this->estado === self::ESTADO_DEVUELTO;
+    }
+
+    /**
+     * Indica si el préstamo sigue sin devolver: estado `activo` o `vencido`
+     * (ambos ocupan ejemplar y cuentan para el límite de tres, D-026).
+     */
+    public function noDevuelto(): bool
+    {
+        return $this->estado === self::ESTADO_ACTIVO || $this->estado === self::ESTADO_VENCIDO;
+    }
 }
