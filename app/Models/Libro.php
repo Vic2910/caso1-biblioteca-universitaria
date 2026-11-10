@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class Libro extends Model
 {
@@ -60,6 +63,33 @@ class Libro extends Model
     public function prestamosActivos(): int
     {
         return $this->prestamos()->where('estado', Prestamo::ESTADO_ACTIVO)->count();
+    }
+
+    /**
+     * Elimina de `portadas/{id}` todo archivo cuya ruta difiera de la
+     * referencia vigente en la base de datos (specs/005-gestion-portadas,
+     * D-020): es el paso final de las transiciones T1, T2 y T3 y la
+     * garantía de ausencia de huérfanos incluso ante reemplazos
+     * superpuestos (SC-005).
+     *
+     * Tolera fallos de disco: los registra y no lanza, para que un problema
+     * transitorio de Storage no invalide la operación en curso (D-025).
+     */
+    public function reconciliarPortada(): void
+    {
+        try {
+            $disco = Storage::disk('public');
+
+            foreach ($disco->files("portadas/{$this->id}") as $archivo) {
+                if ($archivo !== $this->portada) {
+                    $disco->delete($archivo);
+                }
+            }
+        } catch (Throwable $exception) {
+            Log::warning('No se pudo reconciliar el directorio de portadas del libro '.$this->id, [
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     /**

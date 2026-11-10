@@ -16,7 +16,7 @@
                 @foreach ($libros as $libro)
                     <li>
                         <a class="tarjeta-libro" href="{{ route('catalogo.show', $libro) }}">
-                            @include('partials.portada', ['portada' => $libro->portada, 'titulo' => $libro->titulo])
+                            @include('partials.portada', ['libro' => $libro])
                             <h3>{{ $libro->titulo }}</h3>
                             <p class="autor">{{ $libro->autor }}</p>
                             <p class="anio">{{ $libro->anio_publicacion }}</p>

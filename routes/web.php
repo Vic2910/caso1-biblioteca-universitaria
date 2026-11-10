@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\LibroController;
+use App\Http\Controllers\PortadaController;
 use App\Http\Controllers\PrestamoController;
 use App\Models\Categoria;
 use App\Models\Libro;
@@ -21,6 +22,15 @@ Route::get('/', function () {
 
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo.index');
 Route::get('/catalogo/{id}', [CatalogoController::class, 'show'])->whereNumber('id')->name('catalogo.show');
+
+/*
+ * Entrega de portadas (specs/005-gestion-portadas, D-018/D-023).
+ * SIN middleware `auth`: la comprobación de sesión es propia de la acción
+ * para responder 401 con vista en español en lugar de redirigir (FR-007).
+ * No se usa el enlace simbólico `/storage`; `php artisan storage:link` no
+ * es requisito porque toda lectura pasa por esta ruta.
+ */
+Route::get('/portadas/{libro}', [PortadaController::class, 'show'])->whereNumber('libro')->name('portadas.show');
 
 /*
  * Gestión de libros (specs/003-gestion-libros, D-018).

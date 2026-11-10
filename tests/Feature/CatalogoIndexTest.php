@@ -9,7 +9,6 @@ use App\Models\Libro;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -113,13 +112,13 @@ class CatalogoIndexTest extends TestCase
         $this->assertStringContainsString('Julio Cortázar', $tarjetas[0]['texto']);
     }
 
-    public function test_la_tarjeta_con_portada_registrada_usa_storage_con_respaldo_predeterminado(): void
+    public function test_la_tarjeta_con_portada_registrada_usa_la_ruta_con_sesion_con_respaldo_predeterminado(): void
     {
-        Libro::factory()->create(['portada' => 'portadas/ejemplo.jpg']);
+        $libro = Libro::factory()->create(['portada' => 'portadas/ejemplo.jpg']);
 
         $respuesta = $this->get('/catalogo')->assertOk();
 
-        $respuesta->assertSee(Storage::disk('public')->url('portadas/ejemplo.jpg'), false);
+        $respuesta->assertSee(route('portadas.show', $libro), false);
         $respuesta->assertSee('onerror="this.onerror=null', false);
     }
 

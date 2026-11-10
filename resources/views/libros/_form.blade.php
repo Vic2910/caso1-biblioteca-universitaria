@@ -106,7 +106,7 @@
 <div class="campo-formulario">
     <label for="portada">Portada</label>
     @isset($libro)
-        @include('partials.portada', ['portada' => $libro->portada, 'titulo' => $libro->titulo])
+        @include('partials.portada', ['libro' => $libro])
         <p class="ayuda-campo">El reemplazo de la portada estará disponible en una funcionalidad futura.</p>
     @else
         <input type="file"

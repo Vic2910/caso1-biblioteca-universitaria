@@ -6,7 +6,7 @@
     <section class="ficha">
         <h2>Ficha del libro</h2>
 
-        @include('partials.portada', ['portada' => $libro->portada, 'titulo' => $libro->titulo])
+        @include('partials.portada', ['libro' => $libro])
 
         <dl class="ficha-campos">
             <dt>Título</dt>

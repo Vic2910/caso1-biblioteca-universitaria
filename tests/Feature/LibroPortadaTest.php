@@ -113,7 +113,7 @@ class LibroPortadaTest extends TestCase
 
             $this->get(route('catalogo.show', $libro))
                 ->assertOk()
-                ->assertSee(Storage::disk('public')->url($libro->portada), false);
+                ->assertSee(route('portadas.show', $libro), false);
         }
 
         $this->assertDatabaseCount('libros', 3);
