@@ -22,7 +22,9 @@ use Tests\TestCase;
  * un fallo de disco al guardar o de la base de datos al persistir
  * responde 302 con el mensaje exacto junto al campo, deja la portada
  * previa y el registro intactos y no deja archivos huérfanos (el nuevo se
- * elimina como compensación). Los casos de borrado se añaden en T016.
+ * elimina como compensación). Los casos de borrado (T016) cubren un fallo
+ * de disco al eliminar la portada: mismo mensaje literal y archivo +
+ * referencia intactos (SC-003).
  */
 class PortadaFalloAlmacenamientoTest extends TestCase
 {
@@ -148,6 +150,23 @@ class PortadaFalloAlmacenamientoTest extends TestCase
         return $discoReal;
     }
 
+    /**
+     * Sustituye el disco `public` por un doble cuyo `delete` devuelve
+     * `false` (fallo de almacenamiento al borrar, D-025) y devuelve la
+     * instancia falsa real para asertar sobre ella después.
+     */
+    private function discoFalloEnBorrado(): FilesystemAdapter
+    {
+        $discoReal = Storage::disk('public');
+
+        $discoFallo = Mockery::mock(FilesystemAdapter::class);
+        $discoFallo->shouldReceive('delete')->andReturnFalse();
+
+        Storage::shouldReceive('disk')->with('public')->andReturn($discoFallo);
+
+        return $discoReal;
+    }
+
     public function test_un_fallo_de_disco_al_guardar_muestra_el_mensaje_y_no_altera_la_portada_previa(): void
     {
         $libro = Libro::factory()->create(['titulo' => 'Rayuela']);
@@ -217,5 +236,34 @@ class PortadaFalloAlmacenamientoTest extends TestCase
         $pagina = $this->get(route('libros.edit', $libro))->assertOk();
         $this->assertErrorJuntoAlCampo($pagina->getContent(), 'portada', self::MENSAJE_ALMACENAMIENTO);
         $pagina->assertDontSee('Fallo simulado interno de la base de datos', false, 'No se exponen trazas técnicas');
+    }
+
+    public function test_un_fallo_de_disco_al_eliminar_muestra_el_mensaje_y_conserva_la_portada(): void
+    {
+        $libro = Libro::factory()->create(['titulo' => 'Rayuela']);
+        $ruta = $this->sembrarPortada($libro);
+        $discoReal = $this->discoFalloEnBorrado();
+
+        $respuesta = $this->from(route('libros.edit', $libro))
+            ->delete('/libros/'.$libro->id.'/portada');
+
+        $respuesta->assertRedirect(route('libros.edit', $libro));
+        $this->assertSame(
+            [self::MENSAJE_ALMACENAMIENTO],
+            $this->mensajesDePortadaEnSesion(),
+            'La sesión debe llevar el mensaje exacto del fallo de disco'
+        );
+        $this->assertNull(session('exito'), 'Sin borrado no hay mensaje de éxito');
+
+        // Archivo y referencia intactos: sin cambios ante fallo de disco (SC-003).
+        $libro->refresh();
+        $this->assertSame($ruta, $libro->portada);
+
+        $discoReal->assertExists($ruta);
+        $discoReal->assertCount("portadas/{$libro->id}", 1);
+
+        // El mensaje exacto aparece junto al campo `portada` (contrato §2).
+        $pagina = $this->get(route('libros.edit', $libro))->assertOk();
+        $this->assertErrorJuntoAlCampo($pagina->getContent(), 'portada', self::MENSAJE_ALMACENAMIENTO);
     }
 }
