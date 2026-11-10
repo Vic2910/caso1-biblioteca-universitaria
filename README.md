@@ -3,9 +3,9 @@
 Aplicación web local para la gestión de una biblioteca universitaria, construida
 con **Laravel 13** (PHP >= 8.3) y una base de datos relacional. La base queda
 lista con esquema versionado con migraciones y datos de prueba; sobre ella se
-ofrece la consulta del catálogo, el **CRUD de libros y categorías** y el
-**registro, consulta y devolución de préstamos**, con validación y mensajes en
-español.
+ofrece la consulta del catálogo, el **CRUD de libros y categorías**, la
+**gestión de portadas de los libros** y el **registro, consulta y devolución de
+préstamos**, con validación y mensajes en español.
 
 ## Requisitos previos
 
@@ -30,14 +30,12 @@ cp .env.example .env                # 2. crear el archivo local de configuració
 # 3. editar .env y completar los datos de conexión (ver abajo)
 php artisan key:generate            # 4. generar la APP_KEY
 php artisan migrate --seed          # 5. crear el esquema y cargar los datos de prueba
-php artisan storage:link            # 6. enlace simbólico para servir las portadas subidas
 ```
 
-El comando `php artisan storage:link` crea el enlace
-`public/storage` → `storage/app/public`, de modo que los archivos subidos al
-disco público (por ejemplo, las portadas de los libros en
-`storage/app/public/portadas`) se sirvan por HTTP desde la aplicación. Es
-necesario ejecutarlo una sola vez por instalación, después de `key:generate`.
+**No se requiere `php artisan storage:link`**: las portadas se guardan en
+`storage/app/public/portadas` pero se sirven por la ruta controlada
+`GET /portadas/{id}` (ver «Gestión de portadas»), de modo que el enlace
+simbólico `public/storage` no se usa en ningún punto de la aplicación.
 
 ### Configuración de conexión (`.env`)
 
@@ -144,9 +142,10 @@ aparecen **junto al campo** correspondiente y lo escrito se conserva (`old()`).
   los **préstamos activos** del libro («El número de ejemplares no puede ser
   inferior a los préstamos activos (n).»).
 - **Categoría**: obligatoria; el formulario solo ofrece categorías existentes.
-- **Portada** (opcional): imagen JPG, PNG o WebP de hasta 2 MB. Requiere haber
-  ejecutado `php artisan storage:link` (ver «Instalación»). Al editar sin
-  enviar archivo, la portada existente **queda intacta**.
+- **Portada** (opcional): imagen JPG, PNG o WebP de hasta 2 MB inclusive.
+  Se asocia, reemplaza o elimina **solo desde el formulario de edición**
+  (ver «Gestión de portadas»). Al editar sin enviar archivo, la portada
+  existente **queda intacta**.
 - **Disponibilidad derivada**: el formulario **no** contiene un campo
   «ejemplares disponibles»; el servidor lo calcula siempre como
   `ejemplares_totales − préstamos activos` en cada guardado.
@@ -190,6 +189,41 @@ previa, respaldo `RESTRICT` de la base de datos y confirmación del usuario.
 | Listado (`/categorias`) | Alta / Edición de categoría |
 |---|---|
 | ![Listado de categorías con libros asociados](public/images/capturas/categorias-listado.png) | ![Formulario de una categoría](public/images/capturas/categorias-crear.png) ![Edición de una categoría](public/images/capturas/categorias-editar.png) |
+
+## Gestión de portadas
+
+Los libros pueden llevar una imagen de portada, que se asocia, reemplaza y
+elimina **exclusivamente desde el formulario de edición del libro**
+(`/libros/{id}/editar`): ni el catálogo ni la ficha ofrecen controles de
+portada. Cada archivo vive en el directorio propio
+`storage/app/public/portadas/{id}/` (exactamente un archivo por libro) y
+`libros.portada` guarda su ruta.
+
+| Regla | Detalle |
+|---|---|
+| Formatos aceptados | **JPG, PNG y WebP**; cualquier otro archivo (GIF, SVG, TIFF o contenido que no sea imagen) se rechaza con «La portada debe ser una imagen JPG, PNG o WebP.» junto al campo |
+| Límite de tamaño | **2 MB inclusive** (2 097 152 bytes exactos se acepta); por encima → «La portada no puede superar los 2 MB.» junto al campo |
+| Asociar / reemplazar | Con un archivo elegido en el campo «Portada», el botón «Guardar» de la edición ejecuta la transición y muestra «Portada actualizada correctamente.»; al reemplazar, el archivo anterior se elimina y solo queda el nuevo (cero huérfanos) |
+| Editar sin archivo | La portada existente **queda intacta**: guardar el formulario nunca la borra de paso |
+| Eliminar | Botón «Eliminar portada» de la edición (solo visible si hay portada) con confirmación nativa «¿Seguro que desea eliminar la portada de este libro? La imagen dejará de mostrarse.»; se envía como `DELETE /libros/{id}/portada` — la ruta **no existe** para GET/POST y un `GET` no elimina nada — y muestra «Portada eliminada correctamente.» |
+| Ver las imágenes | `GET /portadas/{id}` **exige sesión iniciada**: sin sesión responde `401` con «Debe iniciar sesión para ver las imágenes de portadas.» y jamás envía los bytes; en un navegador sin sesión, listado y ficha muestran la imagen predeterminada gracias al respaldo `onerror` |
+| Borrar el libro | El hook `deleting` del modelo elimina `portadas/{id}/` completo (y la referencia si estuviera fuera): ningún archivo queda huérfano por ninguna vía de borrado |
+
+- **No se requiere `php artisan storage:link`**: la lectura pasa por la
+  ruta controlada `GET /portadas/{id}`; ninguna vista usa el enlace
+  simbólico `public/storage` (D-018/D-023).
+- La imagen predeterminada es `public/images/libro-sin-portada.svg`, con
+  `alt` «Sin portada»; con portada, el `alt` es el título del libro.
+
+### Capturas de portadas
+
+| Listado (portada real y predeterminadas) | Detalle con portada real |
+|---|---|
+| ![Listado del catálogo con la portada real de un libro y las predeterminadas de los demás](public/images/capturas/portadas-listado.png) | ![Ficha de un libro mostrando su portada real](public/images/capturas/portadas-detalle.png) |
+
+| Detalle sin portada (imagen predeterminada) |
+|---|
+| ![Ficha de un libro sin portada con la imagen predeterminada](public/images/capturas/portadas-detalle-sin-portada.png) |
 
 ## Gestión de préstamos
 
@@ -287,7 +321,7 @@ capas de confirmación está en «Eliminaciones con confirmación», más arriba
 ## Estructura del proyecto
 
 ```text
-app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController, PrestamoController
+app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController, PrestamoController, PortadaController
 app/Http/Requests/      # LibroStoreRequest, CategoriaStoreRequest, RegistrarPrestamoRequest…
 app/Models/             # Categoría, Libro y Prestamo (Eloquent)
 app/Services/           # EliminacionService y Prestamos/PrestamoService (reglas de préstamo)
