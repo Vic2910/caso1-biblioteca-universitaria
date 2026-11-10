@@ -33,6 +33,14 @@ Route::get('/catalogo/{id}', [CatalogoController::class, 'show'])->whereNumber('
 Route::get('/portadas/{libro}', [PortadaController::class, 'show'])->whereNumber('libro')->name('portadas.show');
 
 /*
+ * Eliminación de portada (specs/005, FR-005/D-018): ruta nueva bajo
+ * `/libros` SOLO para DELETE — GET/POST/PUT/PATCH responden 405 y no
+ * eliminan nada (Principio IV); la confirmación es nativa y previa al
+ * envío (SC-004, contracts/http-endpoints.md §2).
+ */
+Route::delete('/libros/{libro}/portada', [PortadaController::class, 'destroy'])->whereNumber('libro')->name('libros.portadas.destroy');
+
+/*
  * Gestión de libros (specs/003-gestion-libros, D-018).
  * Las rutas de consulta de `002` quedan intactas; la eliminación (DELETE)
  * se registra en la fase de US2.

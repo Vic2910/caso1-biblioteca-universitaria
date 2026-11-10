@@ -44,6 +44,10 @@ class Libro extends Model
         static::saving(function (Libro $libro): void {
             $libro->recalcularDisponibilidad();
         });
+
+        static::deleting(function (Libro $libro): void {
+            $libro->eliminarPortadas();
+        });
     }
 
     /**
@@ -87,6 +91,32 @@ class Libro extends Model
             }
         } catch (Throwable $exception) {
             Log::warning('No se pudo reconciliar el directorio de portadas del libro '.$this->id, [
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Transición T5 (specs/005, D-020/FR-004/SC-005): al eliminar el libro
+     * borra su directorio `portadas/{id}/` completo y, si la referencia
+     * vigente queda fuera de ese directorio (portadas dadas de alta en
+     * `003` con `store('portadas')`), también ese archivo, para que
+     * ninguna vía de borrado deje archivos huérfanos.
+     *
+     * Tolera fallos de disco (D-022/D-025): se registran y no impiden
+     * eliminar el libro.
+     */
+    public function eliminarPortadas(): void
+    {
+        try {
+            $disco = Storage::disk('public');
+            $disco->deleteDirectory("portadas/{$this->id}");
+
+            if ($this->portada !== null) {
+                $disco->delete($this->portada);
+            }
+        } catch (Throwable $exception) {
+            Log::warning('No se pudieron eliminar las portadas del libro '.$this->id, [
                 'error' => $exception->getMessage(),
             ]);
         }

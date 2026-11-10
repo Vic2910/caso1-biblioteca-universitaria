@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Libro;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Entrega y gestión de las portadas de libros (specs/005-gestion-portadas,
@@ -48,6 +50,44 @@ class PortadaController extends Controller
     }
 
     /**
+     * Elimina la portada del libro (specs/005, FR-005; transición T3 de
+     * data-model.md §Ciclo de vida).
+     *
+     * Orden fijo: libro → referencia en la base de datos → disco. Si el
+     * borrado del archivo falla, archivo y referencia quedan intactos y se
+     * responde 302 a la edición con el mensaje literal de
+     * `user-messages.md` §2 junto al campo `portada` (D-025,
+     * contracts/http-endpoints.md §2). Solo existe la ruta DELETE: la
+     * confirmación es nativa y previa al envío (SC-004).
+     */
+    public function destroy(string $libro): RedirectResponse
+    {
+        $modelo = $this->resolverLibro($libro);
+
+        if ($modelo->portada === null) {
+            abort(404, 'Portada no encontrada');
+        }
+
+        try {
+            $eliminado = Storage::disk('public')->delete($modelo->portada);
+        } catch (Throwable) {
+            $eliminado = false;
+        }
+
+        if (! $eliminado) {
+            return $this->errorPortada($modelo);
+        }
+
+        $modelo->portada = null;
+        $modelo->save();
+        $modelo->reconciliarPortada();
+
+        return redirect()
+            ->route('libros.edit', $modelo)
+            ->with('exito', 'Portada eliminada correctamente.');
+    }
+
+    /**
      * Tipo MIME derivado de la extensión registrada: los tres formatos
      * admitidos por la validación (JPG, PNG y WebP, D-019) son los únicos
      * que la aplicación almacena.
@@ -74,5 +114,17 @@ class PortadaController extends Controller
         }
 
         return $libro;
+    }
+
+    /**
+     * 302 de vuelta al formulario de edición con el mensaje literal de
+     * `user-messages.md` §2 junto al campo `portada`: sin cambios en la
+     * portada ni en el registro del libro (FR-006, D-025).
+     */
+    private function errorPortada(Libro $libro): RedirectResponse
+    {
+        return redirect()
+            ->route('libros.edit', $libro)
+            ->withErrors(['portada' => 'No se pudo guardar la imagen. Inténtelo de nuevo.']);
     }
 }

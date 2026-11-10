@@ -110,7 +110,8 @@
             Vista previa de la portada actual (005, D-024): la imagen se
             sirve por la ruta con sesión y, debajo, el input restringido a
             los formatos admitidos con su leyenda de contrato
-            (user-messages.md §4). Sin controles de eliminación en US1.
+            (user-messages.md §4). El control de borrado (US2) se añade
+            tras el mensaje de validación de este mismo campo.
         --}}
         @include('partials.portada', ['libro' => $libro])
         <input type="file"
@@ -128,6 +129,19 @@
     @error('portada')
         <p class="error-campo" role="alert">{{ $message }}</p>
     @enderror
+    @isset($libro)
+        @if ($libro->portada !== null)
+            {{--
+                Botón «Eliminar portada» (005, ui-structure §1): enlaza con
+                el formulario propio `formulario-eliminar-portada` —
+                renderizado en `edit.blade.php`— mediante el atributo `form`,
+                porque dentro del formulario de edición no caben
+                formularios anidados. Solo visible con portada registrada y
+                con confirmación nativa previa al envío del DELETE (SC-004).
+            --}}
+            <button type="submit" class="boton boton-peligro" form="formulario-eliminar-portada">Eliminar portada</button>
+        @endif
+    @endisset
 </div>
 
 <div class="acciones-formulario">
