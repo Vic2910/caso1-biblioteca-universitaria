@@ -172,7 +172,7 @@ class PortadaSubidaTest extends TestCase
             $libro->refresh();
             $this->assertNotNull($libro->portada, 'La ruta de la portada debe guardarse en la BD');
             $this->assertStringStartsWith("portadas/{$libro->id}/", $libro->portada, 'La ruta debe ser relativa y propia del libro');
-            $this->assertStringNotStartsWith('/', $libro->portada);
+            $this->assertFalse(str_starts_with($libro->portada, '/'), 'La ruta no debe ser absoluta');
 
             $disco = Storage::disk('public');
             $disco->assertExists($libro->portada);
@@ -287,10 +287,12 @@ class PortadaSubidaTest extends TestCase
         $ruta = $this->sembrarPortada($libro);
 
         $datos = $this->datosValidos($libro);
-        $datos['portada'] = UploadedFile::fake()->createWithContent(
-            'portada.jpg',
-            'esto no es una imagen sino un archivo de texto plano'
-        );
+
+        // UploadedFile real: el nombre .jpg con contenido de texto debe
+        // rechazarse por análisis de contenido, no por nombre de archivo.
+        $rutaTexto = tempnam(sys_get_temp_dir(), 'portada');
+        file_put_contents($rutaTexto, 'esto no es una imagen sino un archivo de texto plano');
+        $datos['portada'] = new UploadedFile($rutaTexto, 'portada.jpg', null, null, true);
 
         $respuesta = $this->followingRedirects()
             ->from(route('libros.edit', $libro))

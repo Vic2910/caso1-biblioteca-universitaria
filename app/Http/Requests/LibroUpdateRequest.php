@@ -53,6 +53,9 @@ class LibroUpdateRequest extends FormRequest
      * Mensajes en español cuyo texto no puede derivarse de la traducción
      * genérica (contrato user-messages.md §1): el límite superior del año y,
      * cuando hay préstamos activos, la cota inferior del total de ejemplares.
+     * Las reglas de portada —`file`, `mimes` y `max`— fijan aquí sus textos
+     * literales para la edición (specs/005, D-019): el alta de `003` sigue
+     * usando el bloque `custom` de `lang/es/validation.php`.
      *
      * @return array<string, string>
      */
@@ -63,6 +66,9 @@ class LibroUpdateRequest extends FormRequest
         $mensajes = [
             'anio_publicacion.min' => $mensajeAnio,
             'anio_publicacion.max' => $mensajeAnio,
+            'portada.file' => 'La portada debe ser una imagen JPG, PNG o WebP.',
+            'portada.mimes' => 'La portada debe ser una imagen JPG, PNG o WebP.',
+            'portada.max' => 'La portada no puede superar los 2 MB.',
         ];
 
         $prestamosActivos = $this->libro()->prestamosActivos();

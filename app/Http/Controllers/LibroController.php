@@ -12,6 +12,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * CRUD de libros (specs/003-gestion-libros, D-018): alta y edición sobre las
@@ -60,24 +63,26 @@ class LibroController extends Controller
 
     /**
      * Actualiza el libro validado; si no se envía archivo, la portada
-     * existente queda intacta (D-021; el reemplazo es de `005`).
+     * existente queda intacta (transición T4, FR-001). Con archivo nuevo
+     * ejecuta la secuencia T1/T2 de specs/005-gestion-portadas (D-020):
+     * guardar el archivo, persistir la referencia, borrar el anterior y
+     * reconciliar el directorio (D-020/D-025).
      */
     public function update(LibroUpdateRequest $request, string $libro): RedirectResponse
     {
         $modelo = $this->resolverLibro($libro);
         $datos = $request->validated();
+        unset($datos['portada']);
 
-        if ($request->hasFile('portada')) {
-            $datos['portada'] = $request->file('portada')->store('portadas', 'public');
-        } else {
-            unset($datos['portada']);
+        if (! $request->hasFile('portada')) {
+            $modelo->fill($datos)->save();
+
+            return redirect()
+                ->route('catalogo.show', $modelo)
+                ->with('success', 'Libro actualizado correctamente.');
         }
 
-        $modelo->fill($datos)->save();
-
-        return redirect()
-            ->route('catalogo.show', $modelo)
-            ->with('success', 'Libro actualizado correctamente.');
+        return $this->reemplazarPortada($request, $modelo, $datos);
     }
 
     /**
@@ -107,6 +112,79 @@ class LibroController extends Controller
         return redirect()
             ->route('catalogo.index')
             ->with('success', 'Libro eliminado correctamente.');
+    }
+
+    /**
+     * Transiciones T1/T2 de specs/005-gestion-portadas (D-020): guarda
+     * primero el archivo nuevo en `portadas/{id}/`, persiste la referencia
+     * en la base de datos, borra el archivo anterior y reconcilia el
+     * directorio para que nunca queden huérfanos (SC-005).
+     *
+     * Un fallo de disco o de la base de datos responde con el mensaje de
+     * contrato junto al campo `portada`, conservando la portada previa y el
+     * registro intactos (FR-006, D-025); si la base de datos falla tras
+     * guardar el archivo, este se elimina como compensación.
+     *
+     * @param  array<string, mixed>  $datos
+     */
+    private function reemplazarPortada(LibroUpdateRequest $request, Libro $modelo, array $datos): RedirectResponse
+    {
+        $archivo = $request->file('portada');
+        $disco = Storage::disk('public');
+        $rutaAnterior = $modelo->portada;
+
+        try {
+            $extension = $archivo->guessExtension() ?? 'jpg';
+            $ruta = $disco->putFileAs("portadas/{$modelo->id}", $archivo, Str::uuid()->toString().'.'.$extension);
+        } catch (Throwable) {
+            $ruta = false;
+        }
+
+        if ($ruta === false) {
+            return $this->errorPortada($modelo);
+        }
+
+        try {
+            $modelo->fill($datos);
+            $modelo->portada = $ruta;
+            $modelo->save();
+        } catch (Throwable) {
+            try {
+                $disco->delete($ruta);
+            } catch (Throwable) {
+                // Compensación tolerante: si fallara, el archivo lo retira
+                // la reconciliación futura del directorio (D-020).
+            }
+
+            return $this->errorPortada($modelo);
+        }
+
+        if ($rutaAnterior !== null && $rutaAnterior !== $ruta) {
+            try {
+                $disco->delete($rutaAnterior);
+            } catch (Throwable) {
+                // Lo retira la reconciliación del paso siguiente (D-020).
+            }
+        }
+
+        $modelo->reconciliarPortada();
+
+        return redirect()
+            ->route('libros.edit', $modelo)
+            ->with('exito', 'Portada actualizada correctamente.');
+    }
+
+    /**
+     * 302 de vuelta al formulario de edición con el mensaje literal de
+     * `user-messages.md` §2 junto al campo `portada` y los valores del
+     * formulario conservados con `old()` (sin rutas ni trazas, D-025).
+     */
+    private function errorPortada(Libro $libro): RedirectResponse
+    {
+        return redirect()
+            ->route('libros.edit', $libro)
+            ->withInput(request()->input())
+            ->withErrors(['portada' => 'No se pudo guardar la imagen. Inténtelo de nuevo.']);
     }
 
     /**

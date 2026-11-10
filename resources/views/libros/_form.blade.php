@@ -106,8 +106,18 @@
 <div class="campo-formulario">
     <label for="portada">Portada</label>
     @isset($libro)
+        {{--
+            Vista previa de la portada actual (005, D-024): la imagen se
+            sirve por la ruta con sesión y, debajo, el input restringido a
+            los formatos admitidos con su leyenda de contrato
+            (user-messages.md §4). Sin controles de eliminación en US1.
+        --}}
         @include('partials.portada', ['libro' => $libro])
-        <p class="ayuda-campo">El reemplazo de la portada estará disponible en una funcionalidad futura.</p>
+        <input type="file"
+               id="portada"
+               name="portada"
+               accept="image/jpeg,image/png,image/webp">
+        <p class="ayuda-campo">JPG, PNG o WebP, hasta 2 MB. Al guardar un archivo nuevo se reemplaza la portada actual.</p>
     @else
         <input type="file"
                id="portada"

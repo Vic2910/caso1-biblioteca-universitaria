@@ -11,6 +11,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\ViewErrorBag;
 use Mockery;
 use RuntimeException;
 use Tests\TestCase;
@@ -90,6 +91,28 @@ class PortadaFalloAlmacenamientoTest extends TestCase
     }
 
     /**
+     * Devuelve los mensajes flasheados para `portada` en la sesión actual
+     * sin usar `assertSessionHasErrors()`: ese helper arranca el almacén
+     * de sesión fuera de la petición y, con `session.serialization = json`,
+     * la petición siguiente vuelve a ejecutar `marshalErrorBag()` sobre la
+     * `ViewErrorBag` ya convertida; su `foreach` no itera nada y la vacía,
+     * por lo que el mensaje dejaría de mostrarse junto al campo en el GET
+     * posterior (fr-004 / contrato ui-structure §1).
+     *
+     * @return list<string>
+     */
+    private function mensajesDePortadaEnSesion(): array
+    {
+        $errores = session('errors');
+
+        if ($errores instanceof ViewErrorBag) {
+            return $errores->getBag('default')->get('portada');
+        }
+
+        return $errores['default']['messages']['portada'] ?? [];
+    }
+
+    /**
      * Comprueba que el mensaje aparece en el mismo bloque que el campo.
      */
     private function assertErrorJuntoAlCampo(string $html, string $campo, string $mensaje): void
@@ -138,7 +161,11 @@ class PortadaFalloAlmacenamientoTest extends TestCase
             ]));
 
         $respuesta->assertRedirect(route('libros.edit', $libro));
-        $respuesta->assertSessionHasErrors(['portada' => self::MENSAJE_ALMACENAMIENTO]);
+        $this->assertSame(
+            [self::MENSAJE_ALMACENAMIENTO],
+            $this->mensajesDePortadaEnSesion(),
+            'La sesión debe llevar el mensaje exacto del fallo de disco'
+        );
 
         // Portada previa intacta en disco y en la BD; registro sin cambios.
         $libro->refresh();
@@ -171,7 +198,11 @@ class PortadaFalloAlmacenamientoTest extends TestCase
             ]));
 
         $respuesta->assertRedirect(route('libros.edit', $libro));
-        $respuesta->assertSessionHasErrors(['portada' => self::MENSAJE_ALMACENAMIENTO]);
+        $this->assertSame(
+            [self::MENSAJE_ALMACENAMIENTO],
+            $this->mensajesDePortadaEnSesion(),
+            'La sesión debe llevar el mensaje exacto del fallo de base de datos'
+        );
 
         // La BD no cambia y el archivo nuevo se elimina como compensación:
         // solo queda la portada previa (cero huérfanos).
