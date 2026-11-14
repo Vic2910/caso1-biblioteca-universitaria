@@ -22,8 +22,8 @@ Rutas del monolito Laravel en la raíz del repositorio (según plan.md de `006`)
 
 **Purpose**: Confirmar la base heredada de `001`/`002` sobre la que se construye `006`
 
-- [ ] T001 Checkout/verificar la rama base con el código de `001-entorno-datos` y `002-consulta-catalogo` (CatalogoController, vista catalogo/index, paginación, portada, layout, seed de ≥ 15 libros y ≥ 3 categorías); crear la rama `feature/busqueda-catalogo` desde ella en la raíz del repositorio
-- [ ] T002 Ejecutar `php artisan migrate --seed` y `php artisan test` en la raíz del repositorio para confirmar el estado verde de las suites de `001` y `002` antes de empezar (base: database/seeders/, tests/Feature/)
+- [X] T001 Checkout/verificar la rama base con el código de `001-entorno-datos` y `002-consulta-catalogo` (CatalogoController, vista catalogo/index, paginación, portada, layout, seed de ≥ 15 libros y ≥ 3 categorías); crear la rama `feature/busqueda-catalogo` desde ella en la raíz del repositorio
+- [X] T002 Ejecutar `php artisan migrate --seed` y `php artisan test` en la raíz del repositorio para confirmar el estado verde de las suites de `001` y `002` antes de empezar (base: database/seeders/, tests/Feature/)
 
 **Checkpoint**: Entorno de `001`/`002` funcionando y en verde; rama de feature creada.
 
@@ -35,8 +35,8 @@ Rutas del monolito Laravel en la raíz del repositorio (según plan.md de `006`)
 
 **⚠️ CRITICAL**: Ninguna tarea de US1 puede completarse (coincidencia con acentos sobre `editorial`) hasta que esta fase termine
 
-- [ ] T003 Crear migración `database/migrations/YYYY_MM_DD_HHMMSS_alter_libros_editorial_search_collation.php` (posterior a la migración de colación de `002` sobre `titulo`/`autor`) que fija la colación `utf8mb4_0900_ai_ci` sobre `libros.editorial` mediante `Schema::table('libros', fn (Blueprint $t) => $t->string('editorial')->collation('utf8mb4_0900_ai_ci')->change())` (D-030, data-model.md §Cambios de esquema; sin variante MariaDB salvo que la BD lo sea: `utf8mb4_uca1400_ai_ci` o `utf8mb4_unicode_520_ci`)
-- [ ] T004 Ejecutar `php artisan migrate` y verificar con `SHOW FULL COLUMNS FROM libros WHERE Field = 'editorial'` que `Collation = utf8mb4_0900_ai_ci` (quickstart.md §Puesta en marcha)
+- [X] T003 Crear migración `database/migrations/YYYY_MM_DD_HHMMSS_alter_libros_editorial_search_collation.php` (posterior a la migración de colación de `002` sobre `titulo`/`autor`) que fija la colación `utf8mb4_0900_ai_ci` sobre `libros.editorial` mediante `Schema::table('libros', fn (Blueprint $t) => $t->string('editorial')->collation('utf8mb4_0900_ai_ci')->change())` (D-030, data-model.md §Cambios de esquema; sin variante MariaDB salvo que la BD lo sea: `utf8mb4_uca1400_ai_ci` o `utf8mb4_unicode_520_ci`)
+- [X] T004 Ejecutar `php artisan migrate` y verificar con `SHOW FULL COLUMNS FROM libros WHERE Field = 'editorial'` que `Collation = utf8mb4_0900_ai_ci` (quickstart.md §Puesta en marcha)
 
 **Checkpoint**: Esquema listo — la coincidencia sobre los cuatro campos es insensible a mayúsculas y acentos; puede comenzar US1.
 
