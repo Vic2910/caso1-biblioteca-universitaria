@@ -23,7 +23,7 @@ php artisan serve           # → http://127.0.0.1:8000
 Comprobación del cambio de esquema de `006` (D-030):
 
 ```sql
-SHOW FULL COLUMNS FROM libros WHERE Field = 'editorial';  -- Collation = utf8mb4_0900_ai_ci
+SHOW FULL COLUMNS FROM libros WHERE Field = 'editorial';  -- Collation = utf8mb4_0900_ai_ci (utf8mb4_unicode_520_ci en MariaDB)
 ```
 
 ## Escenarios de validación

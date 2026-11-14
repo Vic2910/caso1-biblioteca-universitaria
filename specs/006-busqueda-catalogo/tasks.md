@@ -80,9 +80,9 @@ Rutas del monolito Laravel en la raíz del repositorio (según plan.md de `006`)
 
 **Purpose**: Documentación y validación final transversales
 
-- [ ] T019 [P] Documentar la búsqueda/filtro en el README de la rama (uso de `q`/`categoria`, filtrado automático con debounce, enlace «Limpiar», estados vacíos) y actualizar quickstart.md si la implementación difiere de algún escenario (plan.md §Constitution Check G9 — README como documentación oficial)
-- [ ] T020 Ejecutar la validación manual completa de quickstart.md (escenarios V-001 a V-009 en `http://127.0.0.1:8000/catalogo`, incluida la comprobación de red del debounce en V-007) y registrar el resultado
-- [ ] T021 [P] Limpieza final: sin SQL crudo con entradas del usuario, sin métodos destructivos, valor de `q` siempre escapado con `{{ }}`, mensajes exactos en español sin detalles técnicos (Principio IV; user-messages.md §4); commitear con Conventional Commits por tarea o grupo lógico
+- [X] T019 [P] Documentar la búsqueda/filtro en el README de la rama (uso de `q`/`categoria`, filtrado automático con debounce, enlace «Limpiar», estados vacíos) y actualizar quickstart.md si la implementación difiere de algún escenario (plan.md §Constitution Check G9 — README como documentación oficial)
+- [X] T020 Ejecutar la validación manual completa de quickstart.md (escenarios V-001 a V-009 en `http://127.0.0.1:8000/catalogo`, incluida la comprobación de red del debounce en V-007) y registrar el resultado
+- [X] T021 [P] Limpieza final: sin SQL crudo con entradas del usuario, sin métodos destructivos, valor de `q` siempre escapado con `{{ }}`, mensajes exactos en español sin detalles técnicos (Principio IV; user-messages.md §4); commitear con Conventional Commits por tarea o grupo lógico
 
 ---
 

@@ -111,6 +111,44 @@ catálogo ofrece dos rutas, sin autenticación en esta fase:
 |---|---|
 | ![Listado paginado del catálogo](public/images/capturas/catalogo-listado.png) | ![Ficha de detalle de un libro](public/images/capturas/catalogo-detalle.png) |
 
+## Búsqueda o filtro del catálogo
+
+El listado `GET /catalogo` admite dos criterios de consulta **sobre la misma
+ruta** (sin rutas ni endpoints nuevos), combinables entre sí:
+
+| Parámetro | Efecto |
+|---|---|
+| `q` | Texto libre con coincidencia que **contiene** contra título, autor, editorial e ISBN (regla OR entre los cuatro campos); el texto se recorta y sus comodines `%`/`_` se buscan literalmente |
+| `categoria` | Identificador entero existente: filtro **exacto** sobre `categoria_id`; cualquier valor inválido (`abc`, `0`, `-3`, `1,5`, inexistente…) se ignora y no restringe el listado |
+
+- **Regla Y**: con ambos criterios, solo se muestran los libros que cumplen los
+  dos a la vez (`/catalogo?q=…&categoria=…`).
+- **Sin distinción de mayúsculas ni acentos** en los cuatro campos: una
+  migración de colación fija `libros.editorial` con la misma familia que
+  `titulo` y `autor` (`utf8mb4_0900_ai_ci`, o `utf8mb4_unicode_520_ci` en
+  MariaDB), de modo que «algebra» encuentra «Álgebra lineal».
+- **Filtrado automático con debounce**: `public/js/busqueda-catalogo.js`
+  (JavaScript nativo, sin frameworks ni build) envía el texto **300 ms**
+  después de dejar de teclear —una sola petición en escritura rápida, con el
+  último texto como determinante— y envía el desplegable de categoría en cuanto
+  cambia. Cada criterio reinicia la paginación (el formulario nunca envía
+  `page`) y el foco vuelve al campo con el cursor al final tras la recarga.
+  **Sin JavaScript** la función degradada sigue operativa: «Enter» envía el
+  formulario (el botón se oculta con CSS, nunca con el atributo `hidden`) y el
+  desplegable filtra de forma nativa.
+- **Enlace «Limpiar»**: visible solo con al menos un criterio activo; vuelve a
+  `/catalogo` sin parámetros (campo vacío y «Todas las categorías»).
+- **Estados vacíos diferenciados**:
+
+  | Situación | Mensaje |
+  |---|---|
+  | Criterio activo y cero resultados | «No se encontraron libros que coincidan con la búsqueda» (sin tarjetas ni paginación, criterios visibles en la barra) |
+  | Sin criterio y catálogo vacío | «No hay libros registrados aún» (mensaje heredado de Fase 1) |
+
+- **Paginación filtrada**: 10 libros por página sobre el conjunto filtrado; los
+  enlaces conservan `q` y `categoria` (`withQueryString`) y una página fuera de
+  rango —evaluada sobre el total filtrado— responde 404 «Página no válida».
+
 ## Gestión de libros y categorías
 
 Además de la consulta, la aplicación permite **crear, editar y eliminar** libros
@@ -331,5 +369,6 @@ database/migrations/    # única fuente del esquema
 database/factories/     # datos de prueba deterministas
 database/seeders/       # CatalogoSeeder (3 categorías, 16 libros, 3 préstamos)
 resources/views/        # layout común, catálogo, libros, categorías, préstamos y errores
-tests/Feature/          # pruebas de catálogo, gestión, préstamos y casos heredados de la Fase 1
+public/js/              # busqueda-catalogo.js (debounce nativo, sin build)
+tests/Feature/          # pruebas de búsqueda, catálogo, gestión, préstamos y casos heredados de la Fase 1
 ```
