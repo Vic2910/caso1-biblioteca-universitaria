@@ -8,6 +8,14 @@
 
 **Input**: User description: "Especificación funcional: Registro, consulta y devolución de préstamos — Biblioteca Universitaria, Fase 2 (entrada: Constitución del Caso 1 - Biblioteca Universitaria, versión 1.0)"
 
+## Clarifications
+
+### Session 2026-10-26
+
+- Q: How and when should a loan be marked with the "vencido" (overdue) state? → A: Calculated automatically — a loan still not returned becomes "vencido" from the day after its devolución prevista date; the state is evaluated whenever a loan is registered, returned, or listed.
+- Q: Should overdue (vencido) loans count toward the student's limit of three loans? → A: Yes — any loan not yet returned (activo or vencido) counts toward the limit of three.
+- Q: Should users be allowed to edit or delete registered loans at all? → A: No — loans cannot be edited or deleted; only registration, consultation, and returns exist.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Registrar un préstamo (Priority: P1)
@@ -22,7 +30,7 @@ Como usuario encargado, quiero registrar el préstamo de un libro a un estudiant
 
 1. **Dado** un libro con un ejemplar disponible y un estudiante con menos de tres préstamos activos, **cuando** se registra un préstamo con devolución prevista posterior a la fecha de préstamo, **entonces** se registra el préstamo y la disponibilidad disminuye en uno.
 2. **Dado** un libro sin ejemplares disponibles, **cuando** se intenta prestar, **entonces** se rechaza la operación y la disponibilidad permanece igual.
-3. **Dado** un estudiante con tres préstamos activos, **cuando** se intenta registrar otro, **entonces** se rechaza y no cambia la disponibilidad.
+3. **Dado** un estudiante con tres préstamos no devueltos (activos o vencidos), **cuando** se intenta registrar otro, **entonces** se rechaza y no cambia la disponibilidad.
 4. **Dada** una devolución prevista igual o anterior a la fecha de préstamo, **cuando** se intenta guardar, **entonces** se rechaza y se muestra el error junto al campo.
 
 ---
@@ -58,9 +66,9 @@ Como usuario encargado, quiero consultar los préstamos registrados y sus estado
 
 ### Edge Cases
 
-- Estado "vencido": [NEEDS CLARIFICATION: ¿cómo y cuándo se determina el estado vencido, incluida la fecha exacta de vencimiento?]
-- Préstamos vencidos y límite por estudiante: [NEEDS CLARIFICATION: ¿los préstamos vencidos cuentan para el límite de tres préstamos activos por estudiante?]
-- Edición o eliminación de préstamos: [NEEDS CLARIFICATION: ¿se permite editar o eliminar préstamos y cómo afectan esas operaciones a las existencias y al historial?]
+- Estado "vencido": se determina automáticamente; un préstamo activo no devuelto se considera vencido desde el día siguiente a su devolución prevista, y el estado se evalúa al registrar, devolver o listar préstamos.
+- Préstamos vencidos y límite por estudiante: los préstamos vencidos cuentan para el límite; cualquier préstamo no devuelto (activo o vencido) ocupa una de las tres plazas por estudiante.
+- Edición o eliminación de préstamos: no se permite; el historial de préstamos es inmutable y las únicas operaciones son registrar, consultar y devolver.
 - Mismo estudiante identificado por carné: dos registros con el mismo carné (con o sin espacios sobrantes) se consideran el mismo estudiante para el límite de tres préstamos.
 - Devolución de un préstamo vencido: se permite; la fecha real es obligatoria y no puede ser anterior a la fecha de préstamo.
 - Dos solicitudes simultáneas para el último ejemplar: la regla de disponibilidad se mantiene y solo una puede consumir el ejemplar; la solicitud rechazada recibe el mensaje "No hay ejemplares disponibles de este libro." y la disponibilidad no baja de cero.
@@ -72,12 +80,12 @@ Como usuario encargado, quiero consultar los préstamos registrados y sus estado
 ### Functional Requirements
 
 - **FR-001**: El usuario debe poder registrar y listar préstamos vinculados a un libro y al nombre y carné de un estudiante.
-- **FR-002**: El sistema debe registrar las fechas de préstamo, devolución prevista y devolución real, y manejar los estados activo, devuelto y vencido.
+- **FR-002**: El sistema debe registrar las fechas de préstamo, devolución prevista y devolución real, y manejar los estados activo, devuelto y vencido; un préstamo activo no devuelto pasa a vencido desde el día siguiente a su devolución prevista, y el estado se evalúa al registrar, devolver o listar préstamos.
 - **FR-003**: La devolución prevista debe ser posterior a la fecha de préstamo; el sistema debe rechazar incumplimientos en el servidor y mostrar el error junto al campo correspondiente.
-- **FR-004**: El sistema debe impedir préstamos sin disponibilidad o que superen tres préstamos activos por estudiante, rechazando la operación sin modificar la disponibilidad.
+- **FR-004**: El sistema debe impedir préstamos sin disponibilidad o que superen tres préstamos no devueltos (activos o vencidos) por estudiante, rechazando la operación sin modificar la disponibilidad.
 - **FR-005**: El sistema debe disminuir en uno los ejemplares disponibles al prestar y aumentarlos en uno al devolver; una misma devolución no debe incrementar la cantidad dos veces.
 - **FR-006**: El sistema debe centralizar las reglas de préstamo en un solo lugar y mostrar los errores de validación en español junto a los campos pertinentes, conservando lo ingresado por el usuario.
-- **FR-007**: [NEEDS CLARIFICATION: ¿se permite editar o eliminar préstamos y, si es así, cómo afectan esas operaciones a las existencias y al historial?]
+- **FR-007**: No se permite editar ni eliminar préstamos registrados; las operaciones disponibles son registrar, consultar y devolver. Cualquier modificación externa queda fuera de alcance y no afecta existencias ni historial.
 
 ### Key Entities
 
@@ -90,7 +98,7 @@ Como usuario encargado, quiero consultar los préstamos registrados y sus estado
 ### Measurable Outcomes
 
 - **SC-001**: En los casos válidos probados, cada préstamo reduce la disponibilidad exactamente en uno y cada devolución la incrementa exactamente en uno.
-- **SC-002**: El 100 % de intentos probados sin disponibilidad, con tres préstamos activos o con fechas previstas inválidas se rechazan sin modificar la disponibilidad.
+- **SC-002**: El 100 % de intentos probados sin disponibilidad, con tres préstamos no devueltos (activos o vencidos) o con fechas previstas inválidas se rechazan sin modificar la disponibilidad.
 - **SC-003**: Todos los préstamos de prueba aparecen en el listado con los datos y estados registrados.
 - **SC-004**: El 100 % de los rechazos muestran un mensaje en español junto al campo o formulario correspondiente, sin perder los datos ya ingresados por el usuario.
 

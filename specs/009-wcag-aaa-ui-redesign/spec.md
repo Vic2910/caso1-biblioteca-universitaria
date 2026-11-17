@@ -15,6 +15,11 @@
 - Q: ¿Qué nivel de WCAG se exige y con qué respaldo? → A: Nivel AAA en los criterios aplicables a una aplicación de texto y datos, con matriz de aplicabilidad documentada para cada criterio.
 - Q: ¿Qué herramienta de estilos se usa y cómo se declara? → A: Tailwind 4 y Vite (ya instalados), declarados en el README como parte del sistema de diseño.
 - Q: ¿Se modifica el esquema de datos? → A: No; la especificación es de interfaz y no añade ni modifica entidades, tablas ni reglas de negocio.
+- Q: ¿La pantalla de home debe ser accesible sin iniciar sesión o solo para usuarios autenticados? → A: Público: el home es accesible sin sesión y sus accesos piden iniciar sesión al usarse.
+- Q: ¿Cómo debe indicar la interfaz que una pantalla o listado aún se está cargando? → A: Indicador con texto en el área de contenido (p. ej., "Cargando…"), anunciado y sin bloquear el teclado.
+- Q: ¿Cómo debe confirmar la interfaz que una operación se completó correctamente? → A: Mensaje emergente temporal (toast) en español que desaparece solo, sin exigir cierre.
+- Q: ¿Qué vistas de error debe cubrir el rediseño? → A: Solo las existentes: 401, 404 y conexión; no se añaden otras (p. ej., 500 genérico o 403).
+- Q: ¿Cómo se verificará el cumplimiento de la matriz WCAG en la aceptación? → A: Herramienta automatizada de auditoría + revisión manual de los criterios que la herramienta no cubre.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -46,7 +51,7 @@ Como usuario, quiero que el home ofrezca accesos reales al sistema y que cada li
 
 **Acceptance Scenarios**:
 
-1. **Dado** el home, **cuando** el usuario lo abre, **entonces** ve accesos reales a catálogo, libros, categorías, préstamos y panel, no solo un aviso de conexión.
+1. **Dado** el home, **cuando** el usuario lo abre —con o sin sesión iniciada—, **entonces** ve accesos reales a catálogo, libros, categorías, préstamos y panel, no solo un aviso de conexión; si no tiene sesión, el acceso conduce al inicio de sesión sin ejecutar ninguna operación.
 2. **Dado** el listado de préstamos, **cuando** el usuario lo consulta, **entonces** ve y puede activar la acción de registrar un préstamo, que abre el formulario de registro.
 3. **Dadas** las listas de catálogo, libros, categorías y préstamos, **cuando** una lista está vacía, **entonces** se muestra un mensaje en español indicando que no hay registros junto a la acción principal para crear el primer registro.
 4. **Dado** un usuario autenticado, **cuando** navega desde el home hasta registrar un préstamo y confirmarlo, **entonces** completa el recorrido sin escribir ninguna dirección ni volver atrás.
@@ -133,8 +138,11 @@ Como revisor del proyecto, quiero una declaración explícita de qué contratos 
 - Títulos, nombres, ISBN y carné largos: sin desbordamiento ni solapamiento en los tres tamaños.
 - Estados de préstamo (activo, devuelto, vencido) y disponibilidad de ejemplares comunicados sin depender del color.
 - Errores 401, 404 y de conexión: página útil con acción de salida o reintento y la misma identidad visual.
+- Usuario sin sesión que pulsa un acceso del home: se le solicita iniciar sesión, no se ejecuta ninguna operación y el resto del home sigue siendo navegable.
 - Usuario con preferencia de movimiento reducido: no hay animaciones esenciales para comprender la interfaz.
 - Varios errores de validación a la vez: todos los mensajes aparecen junto a sus campos, en español, con el foco llevado al primer error.
+- Retardo al cargar una pantalla o un listado: se muestra en el área de contenido un texto en español (p. ej., "Cargando…"), anunciado a las tecnologías de apoyo y sin bloquear la navegación por teclado.
+- Mensaje de éxito que aparece mientras el foco está en otro elemento: se anuncia sin arrebatar el foco ni cerrar el mensaje; si el usuario no lo llega a leer, el resultado sigue visible en la pantalla (listado o detalle actualizado).
 - Caracteres del español (á, é, í, ó, ú, ñ, ¿, ¡) en formularios, listados y mensajes: se muestran correctamente.
 
 ## Requirements *(mandatory)*
@@ -158,11 +166,11 @@ Como revisor del proyecto, quiero una declaración explícita de qué contratos 
 
 **Pantallas**
 
-- **FR-010**: Cada pantalla —home, catálogo, libros, categorías, préstamos, panel, login y vistas de error— debe re-especificar su estructura: cabecera y navegación comunes, contenido principal, acciones, estados vacíos y estados de error.
+- **FR-010**: Cada pantalla —home, catálogo, libros, categorías, préstamos, panel, login y vistas de error— debe re-especificar su estructura: cabecera y navegación comunes, contenido principal, acciones, estados vacíos, estados de error y estados de carga.
 - **FR-011**: Cada listado (catálogo, libros, categorías, préstamos) debe mostrar al menos una acción principal visible, incluido el registro de préstamos, hoy inalcanzable desde la interfaz.
-- **FR-012**: El home debe ofrecer accesos reales a las secciones del sistema en lugar de un simple aviso de conexión.
+- **FR-012**: El home debe ofrecer accesos reales a las secciones del sistema en lugar de un simple aviso de conexión; el home es accesible sin iniciar sesión y sus accesos a secciones protegidas conducen al inicio de sesión sin ejecutar ninguna operación.
 - **FR-013**: Toda lista vacía debe mostrar un mensaje en español junto a la acción principal disponible; ninguna pantalla debe presentar áreas vacías sin explicación ni acciones.
-- **FR-014**: Las vistas de error (401, 404 y conexión) deben explicar lo ocurrido en español y ofrecer al menos una acción de salida o reintento.
+- **FR-014**: Las vistas de error (401, 404 y conexión) deben explicar lo ocurrido en español y ofrecer al menos una acción de salida o reintento; el rediseño se limita a estas tres vistas y no añade otras (por ejemplo, un error genérico 500 o 403).
 
 **Sistema de diseño**
 
@@ -179,6 +187,14 @@ Como revisor del proyecto, quiero una declaración explícita de qué contratos 
 
 - **FR-020**: Esta especificación (009) reemplaza los contratos de interfaz de las especificaciones 002 a 008, según la sección "Contratos de interfaz reemplazados"; sus reglas de negocio, de datos y de seguridad permanecen vigentes sin cambios.
 - **FR-021**: No debe realizarse ningún cambio en el esquema de datos: no se añaden, eliminan ni modifican entidades, atributos, tablas ni reglas de negocio.
+
+**Confirmación de operaciones**
+
+- **FR-022**: Toda operación completada con éxito (guardar, eliminar, registrar préstamo, devolver, subir portada) debe mostrar un mensaje emergente temporal (toast) en español que desaparece solo sin exigir cierre, anunciado a las tecnologías de apoyo y sin mover el foco ni bloquear la interacción; el resultado de la operación debe seguir visible en la propia pantalla (p. ej., el registro aparece en el listado), de modo que la información no se pierda cuando el mensaje desaparezca.
+
+**Verificación de accesibilidad**
+
+- **FR-023**: La verificación del cumplimiento debe combinar una auditoría automatizada (contraste, roles y estados) con una revisión manual de los criterios que esa herramienta no cubre (operación por teclado, visibilidad del foco, degradación sin JavaScript, aviso y extensión de sesión, estados sin color), aplicada a las ocho pantallas y a los tres tamaños de aceptación.
 
 ### Matriz de aplicabilidad WCAG 2.1
 
@@ -255,7 +271,7 @@ Con esta tabla, el 100 % de los criterios AAA queda con una decisión documentad
 
 - **SC-001**: En una auditoría de contraste sobre el texto real de las ocho pantallas, el 100 % del texto normal alcanza al menos 7:1.
 - **SC-002**: El 100 % de las tareas principales (navegar, ver detalle, buscar, registrar préstamo, devolver, crear libro o categoría, iniciar sesión) se completa usando exclusivamente el teclado.
-- **SC-003**: Una auditoría frente a la matriz de criterios aplicables registra cero incumplimientos.
+- **SC-003**: Una auditoría automatizada más la revisión manual frente a la matriz de criterios aplicables registra cero incumplimientos.
 - **SC-004**: El 100 % de las pantallas y listados revisados presenta al menos una acción principal visible, y el registro de préstamos es alcanzable desde el home en dos pasos o menos.
 - **SC-005**: Con JavaScript desactivado, el 100 % de las secciones y pantallas sigue siendo navegable y legible.
 - **SC-006**: En los tres tamaños verificados (360 × 640 px, 768 × 1024 px y ≥ 1024 px), el 100 % de las pantallas se muestra sin recortes ni desbordamiento horizontal.
@@ -264,6 +280,7 @@ Con esta tabla, el 100 % de los criterios AAA queda con una decisión documentad
 - **SC-009**: El 100 % de las listas vacías revisadas muestra un mensaje en español junto a su acción principal.
 - **SC-010**: En una comparación entre dos pantallas distintas, el 100 % de los componentes evaluados comparte las mismas reglas de tipografía, espaciado, color y estados, y el README documenta el sistema de diseño.
 - **SC-011**: El 100 % de las especificaciones 002 a 008 aparece declarado en la sección de contratos reemplazados, con su alcance de interfaz identificado.
+- **SC-012**: El 100 % de las operaciones probadas (guardar, eliminar, registrar préstamo, devolver, subir portada) muestra una confirmación en español anunciada a las tecnologías de apoyo y deja el resultado visible en la pantalla aunque el mensaje desaparezca.
 
 ## Contratos de interfaz reemplazados (specs 002 a 008)
 

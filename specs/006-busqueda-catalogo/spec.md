@@ -8,6 +8,13 @@
 
 **Input**: User description: "# Especificación funcional: Búsqueda o filtro del catálogo — Fase 2. Como estudiante, docente o integrante del personal administrativo, quiero buscar o filtrar el catálogo para encontrar libros relevantes. Incluye escenarios de aceptación, casos límite, requisitos FR-001 a FR-006 y criterios SC-001 a SC-005; los campos, la combinación de criterios y el mensaje de resultados vacíos se definieron en la fase de clarificación."
 
+## Clarifications
+
+### Session 2026-10-26
+
+- Q: ¿Cómo debe activarse la búsqueda o el filtro en el listado de libros: con un botón que envíe el formulario o automáticamente mientras el usuario escribe? → A: Filtrado automático mientras el usuario escribe (con debounce).
+- Q: ¿El texto de búsqueda debe escribirse en un único campo que se compara con título, autor, editorial e ISBN a la vez, o debe haber un campo distinto para cada uno de esos cuatro datos? → A: Un único campo de texto comparado contra título, autor, editorial e ISBN (coincide si coincide en cualquiera de ellos).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Localizar libros mediante búsqueda o filtro (Priority: P1)
@@ -20,7 +27,7 @@ Como estudiante, docente o integrante del personal administrativo, quiero buscar
 
 **Acceptance Scenarios**:
 
-1. **Given** un catálogo con libros, **When** el usuario aplica una búsqueda o filtro admitido (texto en título, autor, editorial o ISBN; o filtro por categoría), **Then** se presentan únicamente los libros que coinciden con el criterio definido.
+1. **Given** un catálogo con libros, **When** el usuario escribe texto en el campo de búsqueda o selecciona una categoría, **Then** el listado se actualiza automáticamente y presenta únicamente los libros cuyo título, autor, editorial o ISBN contienen el texto, o que pertenecen a la categoría seleccionada.
 2. **Given** un catálogo con libros, **When** el usuario aplica una búsqueda sin coincidencias, **Then** no se presenta ningún libro que no coincida con el criterio, se muestra el mensaje «No se encontraron libros que coincidan con la búsqueda» y los criterios aplicados permanecen visibles.
 3. **Given** un catálogo con libros, **When** el usuario aplica varios criterios a la vez, **Then** se presentan únicamente los libros que cumplen todos los criterios aplicados simultáneamente.
 4. **Given** un criterio aplicado, **When** el usuario lo limpia, **Then** el listado vuelve a mostrar el catálogo completo sin residuos del filtrado anterior.
@@ -37,14 +44,15 @@ Como estudiante, docente o integrante del personal administrativo, quiero buscar
 - **Búsqueda sin distinguir mayúsculas ni acentos**: la coincidencia no falla por diferencias de mayúsculas/minúsculas ni de acentuación.
 - **ISBN con ceros iniciales**: la búsqueda por ISBN es parcial y compara el texto tal como se almacena, conservando los ceros iniciales.
 - **Catálogo pequeño (datos de prueba)**: con al menos 15 libros de prueba, el criterio debe reducir el listado de forma verificable frente a datos conocidos.
+- **Escritura rápida**: el filtrado automático no debe lanzar una consulta por cada tecla; un breve retardo (*debounce*) agrupa las pulsaciones y el último texto escrito determina los resultados mostrados.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El usuario debe poder aplicar una búsqueda o filtro en el listado principal de libros.
+- **FR-001**: El usuario debe poder aplicar una búsqueda o filtro en el listado principal de libros; el filtrado se aplica automáticamente mientras el usuario escribe el texto (tras un breve retardo, *debounce*) o al cambiar el filtro de categoría, sin necesidad de botón de envío.
 - **FR-002**: El sistema debe mostrar los resultados correspondientes al criterio seleccionado, sin incluir libros que no coincidan con él.
-- **FR-003**: El usuario debe poder buscar por texto parcial (coincidencia que contiene) en título, autor, editorial e ISBN, y filtrar por categoría exacta; la coincidencia no debe distinguir mayúsculas/minúsculas ni acentuación.
+- **FR-003**: El usuario debe poder escribir un único texto de búsqueda que se compara mediante coincidencia que contiene contra título, autor, editorial e ISBN (un libro coincide si el texto aparece en cualquiera de esos cuatro campos), y filtrar por categoría exacta; la coincidencia no debe distinguir mayúsculas/minúsculas ni acentuación.
 - **FR-004**: Cuando una búsqueda no tiene coincidencias, el sistema no debe presentar ningún libro, debe mostrar el mensaje «No se encontraron libros que coincidan con la búsqueda» en español y debe conservar visibles los criterios aplicados.
 - **FR-005**: El sistema debe combinar los varios criterios aplicados con regla Y lógica; un criterio vacío debe mostrar el catálogo completo y la paginación del listado de la Fase 1 debe aplicarse sobre el conjunto de resultados filtrado.
 - **FR-006**: El usuario debe poder limpiar el criterio aplicado y recuperar el listado completo del catálogo.

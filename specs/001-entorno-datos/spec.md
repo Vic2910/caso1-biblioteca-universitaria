@@ -8,6 +8,15 @@
 
 **Input**: User description: "Especificación funcional: Entorno y base de datos (Fase 1): iniciar la aplicación local siguiendo el README y sin servicios de pago obligatorios; disponer de las entidades Libro, Categoría y Préstamo y de sus relaciones mediante un esquema creado con cambios de estructura versionados (claves foráneas y unicidad cuando corresponda); cargar datos de prueba con al menos 15 libros y tres registros por catálogo; usar las tecnologías fijadas por la constitución del proyecto y documentar la conducta de eliminación de datos relacionados. (Primera de las dos especificaciones entregadas en la invocación, seleccionada por el usuario.)"
 
+## Clarifications
+
+### Session 2026-10-26
+
+- Q: Además del ISBN, ¿qué campos del modelo de datos deben tener restricción de unicidad en la base de datos? → A: ISBN y nombre de categoría.
+- Q: ¿Los libros de prueba cargados en esta fase deben incluir archivos de portada reales o servirse con la imagen predeterminada? → A: Sin portada real: todos usan la imagen predeterminada.
+- Q: ¿Los tres préstamos de prueba deben cubrir los tres estados del modelo (activo, devuelto y vencido) o basta con estados indeterminados? → A: Un préstamo activo, uno devuelto y uno vencido.
+- Q: ¿Los ejemplares disponibles de cada libro de prueba deben ser coherentes con los préstamos activos cargados (descontando los ejemplares prestados)? → A: Sí: disponibles = totales − ejemplares en préstamos activos.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Preparar el entorno y los datos (Priority: P1)
@@ -21,7 +30,7 @@ Como integrante del equipo, quiero iniciar la aplicación y preparar una base de
 **Acceptance Scenarios**:
 
 1. **Given** un entorno con los requisitos instalados, **When** se siguen las instrucciones de instalación, **Then** la aplicación local se inicia y conecta con la base de datos elegida.
-2. **Given** una base de datos preparada con el esquema versionado, **When** se cargan los datos de prueba, **Then** existen al menos 15 libros y tres registros por catálogo.
+2. **Given** una base de datos preparada con el esquema versionado, **When** se cargan los datos de prueba, **Then** existen al menos 15 libros, tres registros por catálogo y los préstamos cubren los estados activo, devuelto y vencido.
 3. **Given** las entidades de la biblioteca, **When** se inspeccionan sus relaciones, **Then** cada libro se relaciona con una categoría y cada préstamo con un libro.
 4. **Given** credenciales incorrectas o la base de datos no disponible, **When** se intenta iniciar la aplicación, **Then** no se permite continuar y se muestra un aviso visible en español que explica el fallo y cómo corregir la configuración, sin exponer credenciales.
 
@@ -56,8 +65,8 @@ Como integrante del equipo, quiero que la conducta de eliminación de registros 
 
 - **FR-001**: El equipo debe poder ejecutar la aplicación localmente siguiendo los pasos del README, sin servicios de pago obligatorios y mediante un único comando de inicio documentado.
 - **FR-002**: El sistema debe disponer de los datos de libros, categorías y préstamos y de sus relaciones: una categoría agrupa muchos libros, cada libro pertenece a una categoría y cada préstamo corresponde a un libro.
-- **FR-003**: El esquema debe crearse exclusivamente mediante migraciones, es decir, cambios de estructura versionados; debe incluir claves foráneas y restricciones de unicidad cuando corresponda (por ejemplo, ISBN único).
-- **FR-004**: El equipo debe poder cargar como datos de prueba al menos 15 libros y tres registros por catálogo (categorías y préstamos).
+- **FR-003**: El esquema debe crearse exclusivamente mediante migraciones, es decir, cambios de estructura versionados; debe incluir claves foráneas y restricciones de unicidad sobre el ISBN del libro y el nombre de la categoría.
+- **FR-004**: El equipo debe poder cargar como datos de prueba al menos 15 libros y tres registros por catálogo (categorías y préstamos); los libros de prueba se cargan sin archivo de portada real y muestran la imagen predeterminada, los tres préstamos cubren los estados activo, devuelto y vencido, y los ejemplares disponibles de cada libro igualan a los totales menos los ejemplares en préstamos activos.
 - **FR-005**: La aplicación debe funcionar con las tecnologías fijadas por la constitución del proyecto y con el motor de base de datos elegido entre los que ella permite; la elección debe documentarse en el README.
 - **FR-006**: La eliminación de una categoría con libros o de un libro con préstamos debe restringirse: no se permite mientras existan registros relacionados, se informa del motivo al usuario y la conducta debe documentarse en el README.
 - **FR-007**: Las credenciales de conexión deben permanecer fuera del repositorio y poder cambiar sin editar archivos versionados.
@@ -65,8 +74,8 @@ Como integrante del equipo, quiero que la conducta de eliminación de registros 
 
 ### Key Entities *(include if feature involves data)*
 
-- **Libro**: obra con ISBN, título, autor, editorial, año de publicación, ejemplares totales y disponibles, categoría y portada; se relaciona con una categoría y puede tener muchos préstamos.
-- **Categoría**: clasificación que agrupa libros; se relaciona con muchos libros.
+- **Libro**: obra con ISBN (único), título, autor, editorial, año de publicación, ejemplares totales y disponibles, categoría y portada (imagen predeterminada en los datos de prueba); se relaciona con una categoría y puede tener muchos préstamos.
+- **Categoría**: clasificación que agrupa libros; el nombre es único; se relaciona con muchos libros.
 - **Préstamo**: relación de un libro con el nombre y el carné del estudiante, con las fechas de préstamo, devolución prevista y devolución real, y el estado (activo, devuelto o vencido); corresponde a un libro.
 
 ## Success Criteria *(mandatory)*
@@ -74,7 +83,7 @@ Como integrante del equipo, quiero que la conducta de eliminación de registros 
 ### Measurable Outcomes
 
 - **SC-001**: En una instalación preparada, las tres entidades están presentes con sus relaciones: el 100 % de los libros tiene una categoría asignada y el 100 % de los préstamos corresponde a un libro existente.
-- **SC-002**: La carga inicial genera al menos 15 libros y tres registros por catálogo.
+- **SC-002**: La carga inicial genera al menos 15 libros y tres registros por catálogo, con los tres estados de préstamo representados y el 100 % de los libros con ejemplares disponibles igual a los totales menos los ejemplares en préstamos activos.
 - **SC-003**: Un integrante del equipo completa la instalación y la puesta en marcha en una sola verificación siguiendo únicamente los pasos documentados en el README.
 - **SC-004**: Ante una configuración de conexión incorrecta, la aplicación bloquea el inicio con un aviso visible en el 100 % de los intentos y sin revelar credenciales.
 - **SC-005**: El 100 % de los intentos de eliminar una categoría con libros o un libro con préstamos quedan bloqueados y la restricción aparece documentada en el README.
