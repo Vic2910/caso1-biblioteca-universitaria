@@ -63,20 +63,23 @@ class CatalogoSeeder extends Seeder
     }
 
     /**
-     * Crea las 3 categorías con nombres únicos.
+     * Crea las 3 categorías con nombres únicos. Es repetible: si la
+     * categoría ya existe se reutiliza la fila existente.
      *
      * @return list<Categoria>
      */
     private function sembrarCategorias(): array
     {
         return collect(self::CATEGORIAS)
-            ->map(fn (string $nombre): Categoria => Categoria::create(['nombre' => $nombre]))
+            ->map(fn (string $nombre): Categoria => Categoria::firstOrCreate(['nombre' => $nombre]))
             ->values()
             ->all();
     }
 
     /**
-     * Crea los libros respetando el orden de claves foráneas.
+     * Crea los libros respetando el orden de claves foráneas. Es repetible:
+     * cada libro se identifica por su ISBN y su disponibilidad se deriva
+     * en el evento `saving` del modelo.
      *
      * @param  list<Categoria>  $categorias
      * @return list<Libro>
@@ -86,25 +89,27 @@ class CatalogoSeeder extends Seeder
         $libros = [];
 
         foreach (self::LIBROS as $datos) {
-            $libros[] = Libro::create([
-                'isbn' => $this->isbnParaTitulo($datos['titulo']),
-                'titulo' => $datos['titulo'],
-                'autor' => $datos['autor'],
-                'editorial' => $datos['editorial'],
-                'anio_publicacion' => $datos['anio'],
-                'ejemplares_totales' => $datos['ejemplares'],
-                'ejemplares_disponibles' => $datos['ejemplares'],
-                'categoria_id' => $categorias[$datos['categoria']]->id,
-                'portada' => null,
-            ]);
+            $libros[] = Libro::updateOrCreate(
+                ['isbn' => $this->isbnParaTitulo($datos['titulo'])],
+                [
+                    'titulo' => $datos['titulo'],
+                    'autor' => $datos['autor'],
+                    'editorial' => $datos['editorial'],
+                    'anio_publicacion' => $datos['anio'],
+                    'ejemplares_totales' => $datos['ejemplares'],
+                    'categoria_id' => $categorias[$datos['categoria']]->id,
+                    'portada' => null,
+                ],
+            );
         }
 
         return $libros;
     }
 
     /**
-     * Crea los 3 préstamos (activo, devuelto, vencido) y ajusta la
+     * Crea los 3 préstamos (activo, devuelto, vencido) y recalcula la
      * disponibilidad del libro con préstamo activo para cumplir el invariante.
+     * Es repetible: cada préstamo se identifica por el carnet del estudiante.
      *
      * @param  list<Libro>  $libros
      */
@@ -112,40 +117,47 @@ class CatalogoSeeder extends Seeder
     {
         // Préstamo activo: descuenta un ejemplar disponible de su libro.
         $libroActivo = $libros[0];
-        Prestamo::create([
-            'libro_id' => $libroActivo->id,
-            'nombre_estudiante' => 'Ana Martínez López',
-            'carnet_estudiante' => '202400123',
-            'fecha_prestamo' => now()->subDays(3)->format('Y-m-d'),
-            'fecha_devolucion_prevista' => now()->addDays(11)->format('Y-m-d'),
-            'fecha_devolucion_real' => null,
-            'estado' => Prestamo::ESTADO_ACTIVO,
-        ]);
-        $libroActivo->update([
-            'ejemplares_disponibles' => $libroActivo->ejemplares_totales - 1,
-        ]);
+        Prestamo::updateOrCreate(
+            ['carnet_estudiante' => '202400123'],
+            [
+                'libro_id' => $libroActivo->id,
+                'nombre_estudiante' => 'Ana Martínez López',
+                'fecha_prestamo' => now()->subDays(3)->format('Y-m-d'),
+                'fecha_devolucion_prevista' => now()->addDays(11)->format('Y-m-d'),
+                'fecha_devolucion_real' => null,
+                'estado' => Prestamo::ESTADO_ACTIVO,
+            ],
+        );
 
         // Préstamo devuelto: no afecta a la disponibilidad actual.
-        Prestamo::create([
-            'libro_id' => $libros[1]->id,
-            'nombre_estudiante' => 'Carlos Rodríguez Pérez',
-            'carnet_estudiante' => '202300456',
-            'fecha_prestamo' => now()->subDays(30)->format('Y-m-d'),
-            'fecha_devolucion_prevista' => now()->subDays(16)->format('Y-m-d'),
-            'fecha_devolucion_real' => now()->subDays(17)->format('Y-m-d'),
-            'estado' => Prestamo::ESTADO_DEVUELTO,
-        ]);
+        Prestamo::updateOrCreate(
+            ['carnet_estudiante' => '202300456'],
+            [
+                'libro_id' => $libros[1]->id,
+                'nombre_estudiante' => 'Carlos Rodríguez Pérez',
+                'fecha_prestamo' => now()->subDays(30)->format('Y-m-d'),
+                'fecha_devolucion_prevista' => now()->subDays(16)->format('Y-m-d'),
+                'fecha_devolucion_real' => now()->subDays(17)->format('Y-m-d'),
+                'estado' => Prestamo::ESTADO_DEVUELTO,
+            ],
+        );
 
         // Préstamo vencido: sin devolución real, prevista pasada.
-        Prestamo::create([
-            'libro_id' => $libros[2]->id,
-            'nombre_estudiante' => 'Lucía Fernández Gómez',
-            'carnet_estudiante' => '202200789',
-            'fecha_prestamo' => now()->subDays(40)->format('Y-m-d'),
-            'fecha_devolucion_prevista' => now()->subDays(26)->format('Y-m-d'),
-            'fecha_devolucion_real' => null,
-            'estado' => Prestamo::ESTADO_VENCIDO,
-        ]);
+        Prestamo::updateOrCreate(
+            ['carnet_estudiante' => '202200789'],
+            [
+                'libro_id' => $libros[2]->id,
+                'nombre_estudiante' => 'Lucía Fernández Gómez',
+                'fecha_prestamo' => now()->subDays(40)->format('Y-m-d'),
+                'fecha_devolucion_prevista' => now()->subDays(26)->format('Y-m-d'),
+                'fecha_devolucion_real' => null,
+                'estado' => Prestamo::ESTADO_VENCIDO,
+            ],
+        );
+
+        // La disponibilidad es derivada: el evento `saving` del libro la
+        // recalcula como totales − préstamos activos (specs/003, D-023).
+        $libroActivo->save();
     }
 
     /**
