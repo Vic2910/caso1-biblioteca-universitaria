@@ -4,8 +4,9 @@ Aplicación web local para la gestión de una biblioteca universitaria, construi
 con **Laravel 13** (PHP >= 8.3) y una base de datos relacional. La base queda
 lista con esquema versionado con migraciones y datos de prueba; sobre ella se
 ofrece la consulta del catálogo, el **CRUD de libros y categorías**, la
-**gestión de portadas de los libros** y el **registro, consulta y devolución de
-préstamos**, con validación y mensajes en español.
+**gestión de portadas de los libros**, el **registro, consulta y devolución de
+préstamos** y un **panel de indicadores de solo consulta**, con validación y
+mensajes en español.
 
 ## Requisitos previos
 
@@ -85,7 +86,7 @@ ni SQL.
 ## Consulta del catálogo
 
 La navegación común (cabecera) incluye los enlaces **«Catálogo»**,
-**«Préstamos»** y **«Categorías»**, que distinguen visualmente la página activa
+**«Panel»**, **«Préstamos»** y **«Categorías»**, que distinguen visualmente la página activa
 y funcionan en todas las vistas, incluidas las de error. La consulta del
 catálogo ofrece dos rutas, sin autenticación en esta fase:
 
@@ -317,6 +318,41 @@ aparecen **junto al campo** y lo escrito se conserva (`old()`).
 |---|
 | ![Formulario de devolución con el resumen del préstamo](public/images/capturas/prestamos-devolucion.png) |
 
+## Panel de la biblioteca
+
+La navegación común incluye el enlace **«Panel»**, que abre una única vista de
+**solo consulta** en `GET /panel` (nombre de ruta `panel.index`). No requiere
+autenticación, no acepta parámetros —la fecha de consulta la fija el servidor— y
+no contiene formularios, botones de escritura ni enlaces de eliminación. Muestra
+tres indicadores con rótulos y cifras en español:
+
+| Indicador | Regla de cálculo |
+|---|---|
+| **Libros más prestados** | Los 5 libros con más préstamos del **historial completo** (los devueltos y los vencidos cuentan). Solo aparecen libros con al menos un préstamo. Los empates se resuelven por título —sin distinguir tildes ni mayúsculas— y, si persisten, por ISBN. Cada fila muestra su cifra de préstamos. |
+| **Préstamos vencidos** | Préstamos **sin devolución real** cuya devolución prevista es **estrictamente anterior** a la fecha del día (con prevista = hoy **no** vence). Se ordenan por días de retraso de mayor a menor; cada fila muestra libro, estudiante, carné, fecha de préstamo, devolución prevista y días de retraso. Un libro con varios préstamos pendientes aparece en una fila por préstamo. |
+| **Ejemplares disponibles por categoría** | Suma de `ejemplares_disponibles` de los libros de cada categoría (nunca `ejemplares_totales`). Se listan las categorías que tienen libros, **incluidas las que tienen 0 disponibles**, y se ocultan las que no tienen ninguno. Orden alfabético español sin distinguir tildes ni mayúsculas: «Álgebra» se ordena como «Algebra». |
+
+Cuando un indicador no tiene datos, su sección muestra exactamente
+«**No hay datos disponibles**», sin filas ni relleno artificial. Dos consultas
+con los mismos datos devuelven siempre el mismo orden.
+
+El orden alfabético español se fija en la base de datos con la migración de
+colación `utf8mb4_0900_ai_ci` sobre `libros.titulo`, `libros.autor` y
+`categorias.nombre` (`utf8mb4_unicode_520_ci` en MariaDB). La de
+`categorias.nombre` se incorporó con el panel y es la que garantiza que
+«Álgebra» preceda a «Arte».
+
+Las reglas de estilo de las tres secciones viven en el propio
+`resources/views/panel/index.blade.php` (bloque `<style>`), siguiendo el patrón
+de otras vistas del proyecto: reutilizan las variables CSS del layout común y
+no añaden frameworks ni dependencias nuevas.
+
+### Captura del panel
+
+| Panel con datos sembrados (`/panel`) |
+|---|
+| ![Panel de la biblioteca con los tres indicadores](public/images/capturas/panel.png) |
+
 ## Verificación
 
 ```bash
@@ -359,7 +395,7 @@ capas de confirmación está en «Eliminaciones con confirmación», más arriba
 ## Estructura del proyecto
 
 ```text
-app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController, PrestamoController, PortadaController
+app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController, PrestamoController, PortadaController, PanelController
 app/Http/Requests/      # LibroStoreRequest, CategoriaStoreRequest, RegistrarPrestamoRequest…
 app/Models/             # Categoría, Libro y Prestamo (Eloquent)
 app/Services/           # EliminacionService y Prestamos/PrestamoService (reglas de préstamo)
@@ -368,7 +404,7 @@ lang/es/                # mensajes de validación en español
 database/migrations/    # única fuente del esquema
 database/factories/     # datos de prueba deterministas
 database/seeders/       # CatalogoSeeder (3 categorías, 16 libros, 3 préstamos)
-resources/views/        # layout común, catálogo, libros, categorías, préstamos y errores
+resources/views/        # layout común, catálogo, libros, categorías, préstamos, panel y errores
 public/js/              # busqueda-catalogo.js (debounce nativo, sin build)
-tests/Feature/          # pruebas de búsqueda, catálogo, gestión, préstamos y casos heredados de la Fase 1
+tests/Feature/          # pruebas de búsqueda, catálogo, gestión, préstamos, panel y casos heredados de la Fase 1
 ```
