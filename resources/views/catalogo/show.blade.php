@@ -1,0 +1,55 @@
+@extends('layouts.app')
+
+@section('title', 'Ficha del libro — Biblioteca Universitaria')
+
+@section('content')
+    <section class="ficha">
+        <h2>Ficha del libro</h2>
+
+        @include('partials.portada', ['libro' => $libro])
+
+        <dl class="ficha-campos">
+            <dt>Título</dt>
+            <dd>{{ $libro->titulo }}</dd>
+
+            <dt>Autor</dt>
+            <dd>{{ $libro->autor }}</dd>
+
+            <dt>Editorial</dt>
+            <dd>{{ $libro->editorial }}</dd>
+
+            <dt>Año de publicación</dt>
+            <dd>{{ $libro->anio_publicacion }}</dd>
+
+            <dt>ISBN</dt>
+            <dd>{{ $libro->isbn }}</dd>
+
+            <dt>Total de ejemplares</dt>
+            <dd>{{ $libro->ejemplares_totales }}</dd>
+
+            <dt>Ejemplares disponibles</dt>
+            <dd>{{ $libro->ejemplares_disponibles }}</dd>
+
+            <dt>Categoría</dt>
+            <dd>{{ $libro->categoria->nombre }}</dd>
+        </dl>
+
+        <div class="zona-gestion">
+            <a class="boton" href="{{ route('libros.edit', $libro) }}">Editar</a>
+
+            <form method="post" action="{{ route('libros.destroy', $libro) }}" onsubmit="return confirm('¿Eliminar el libro «{{ $libro->titulo }}»? Esta acción no se puede deshacer.')" data-confirm="¿Está seguro de que desea eliminar este registro?">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="boton boton-peligro">Eliminar</button>
+            </form>
+
+            @if ($libro->prestamos()->exists())
+                <p class="aviso-bloqueo">Este libro tiene préstamos registrados y no puede eliminarse.</p>
+            @endif
+        </div>
+
+        <p>
+            <a href="{{ route('catalogo.index') }}">Volver al catálogo</a>
+        </p>
+    </section>
+@endsection
