@@ -426,6 +426,9 @@
                     <a href="{{ route('catalogo.index') }}" @if (request()->routeIs('catalogo.*')) class="active" @endif>Catálogo</a>
                 </li>
                 <li>
+                    <a href="{{ route('panel.index') }}" @if (request()->routeIs('panel.*')) class="active" @endif>Panel</a>
+                </li>
+                <li>
                     <a href="{{ route('prestamos.index') }}" @if (request()->routeIs('prestamos.*')) class="active" @endif>Préstamos</a>
                 </li>
                 <li>

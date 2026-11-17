@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\LibroController;
+use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PortadaController;
 use App\Http\Controllers\PrestamoController;
 use App\Models\Categoria;
@@ -22,6 +23,12 @@ Route::get('/', function () {
 
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo.index');
 Route::get('/catalogo/{id}', [CatalogoController::class, 'show'])->whereNumber('id')->name('catalogo.show');
+
+/*
+ * Panel de indicadores (specs/007-panel-biblioteca, D-018): una única ruta GET
+ * sin parámetros ni autenticación propia. No se registran rutas de escritura.
+ */
+Route::get('/panel', [PanelController::class, 'index'])->name('panel.index');
 
 /*
  * Entrega de portadas (specs/005-gestion-portadas, D-018/D-023).
