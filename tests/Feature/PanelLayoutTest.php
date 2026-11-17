@@ -91,7 +91,9 @@ class PanelLayoutTest extends TestCase
         $primera = $this->get('/panel')->assertOk()->getContent();
         $segunda = $this->get('/panel')->assertOk()->getContent();
 
-        $this->assertSame($primera, $segunda, 'Dos GET consecutivos con los mismos datos devuelven el mismo HTML (V-008)');
+        $sinCaducidad = fn (string $html): string => preg_replace('/data-sesion-expira="\d+"/', '', $html);
+
+        $this->assertSame($sinCaducidad($primera), $sinCaducidad($segunda), 'Dos GET consecutivos con los mismos datos devuelven el mismo HTML (V-008)');
 
         $documento = new DOMDocument;
         $documento->loadHTML($primera, LIBXML_NOERROR);

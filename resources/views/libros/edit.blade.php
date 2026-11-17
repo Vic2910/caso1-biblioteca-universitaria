@@ -7,7 +7,7 @@
         <h2>Editar un libro</h2>
 
         @if (session('exito'))
-            <div class="mensaje-exito" role="status">{{ session('exito') }}</div>
+            @include('partials.toast', ['mensaje' => session('exito')])
         @endif
 
         <form method="post" action="{{ route('libros.update', $libro) }}" enctype="multipart/form-data">

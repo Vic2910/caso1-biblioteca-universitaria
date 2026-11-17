@@ -6,8 +6,10 @@
     <section class="catalogo">
         <div class="cabecera-seccion">
             <h2>Catálogo de libros</h2>
-            <a class="boton" href="{{ route('libros.create') }}">Nuevo libro</a>
-            @include('partials.accion-principal', ['accion' => 'Registrar préstamo', 'url' => route('prestamos.create')])
+            <div class="acciones-cabecera">
+                <a class="boton boton-secundario" href="{{ route('libros.create') }}">Nuevo libro</a>
+                @include('partials.accion-principal', ['accion' => 'Registrar préstamo', 'url' => route('prestamos.create')])
+            </div>
         </div>
 
         {{--

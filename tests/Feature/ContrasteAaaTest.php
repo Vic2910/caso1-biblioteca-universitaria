@@ -25,6 +25,8 @@ class ContrasteAaaTest extends TestCase
             'secundario sobre fondo' => ['--color-secundario', '--color-fondo'],
             'exito sobre blanco' => ['--color-exito', '#ffffff'],
             'peligro sobre blanco' => ['--color-peligro', '#ffffff'],
+            'aviso sobre blanco' => ['--color-aviso', '#ffffff'],
+            'acento sobre blanco' => ['--color-acento', '#ffffff'],
             'blanco sobre primario' => ['#ffffff', '--color-primario'],
             'blanco sobre primario oscuro' => ['#ffffff', '--color-primario-oscuro'],
             'blanco sobre peligro' => ['#ffffff', '--color-peligro'],

@@ -23,6 +23,8 @@ mensajes en español.
 > su instalación) y con **PostgreSQL local** (requiere cambiar
 > `DB_CONNECTION=pgsql` y el puerto `5432`). El resto de la guía asume MySQL.
 
+> **Subida de portadas**: PHP necesita un directorio temporal escribible para recibir los archivos. Si `php -i` muestra `upload_tmp_dir => no value` y el sistema no puede escribir en su carpeta temporal, la subida de portadas falla con una página en blanco. Defina en `php.ini` una carpeta a la que el usuario pueda escribir, por ejemplo `upload_tmp_dir = "C:/Users/<usuario>/AppData/Local/Temp/php-uploads"`, cree esa carpeta y reinicie el servidor.
+
 ## Instalación (una sola vez por entorno)
 
 ```bash
