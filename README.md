@@ -409,6 +409,35 @@ no añaden frameworks ni dependencias nuevas.
 |---|
 | ![Panel de la biblioteca con los tres indicadores](public/images/capturas/panel.png) |
 
+## Sistema de diseño
+
+La interfaz (especificación `009-wcag-aaa-ui-redesign`) se construye con **Tailwind CSS 4** y **Vite 8** mediante `laravel-vite-plugin`. Las hojas y scripts se cargan con `@vite` desde `resources/css/app.css` y `resources/js/app.js`:
+
+```bash
+npm install
+npm run dev      # desarrollo, con recarga en caliente
+npm run build    # genera public/build para usar sin el servidor de Vite
+```
+
+- **Tokens de color** (`resources/css/app.css`, `:root`): texto, fondo, primario, primario oscuro, secundario, éxito y peligro. El texto normal alcanza **7:1** sobre su fondo real (comprobado en `tests/Feature/ContrasteAaaTest.php`).
+- **Tipografía**: familia Instrument Sans (`@theme`, `--font-sans`), servida localmente desde el build.
+- **Espaciado y radios**: escala de 4 px con radios de 0,375 rem y 0,5 rem.
+- **Foco visible**: contorno de 3 px con desfase de 2 px en `:focus-visible`; nunca se elimina sin sustituto.
+- **Componentes**: botón primario y secundario, campo con etiqueta y error, tarjeta de acceso, tabla, alerta, estado vacío, toast de éxito, estado «Cargando…» y aviso de sesión.
+- **Estados**: normal, hover, foco, activo, error y deshabilitado, definidos una sola vez en el CSS compartido.
+- **Información sin color**: disponibilidad y estados de préstamo se comunican con texto y etiqueta, no solo con color.
+
+### Navegación accesible y puntos de ruptura
+
+- Menús «Gestión» y menú hamburguesa en `<details>`/`<summary>`: funcionan **sin JavaScript**. `resources/js/menus.js` solo añade `aria-expanded`, cierra con `Escape` y devuelve el foco.
+- Puntos de ruptura: 360 × 640 px (una columna, hamburguesa), 768 × 1024 px (navegación horizontal) y ≥ 1024 px (diseño de referencia).
+
+### Cumplimiento WCAG 2.1 AAA aplicable
+
+El alcance de cada criterio está en `specs/009-wcag-aaa-ui-redesign/spec.md` (matriz de aplicabilidad). Lo verificado con pruebas automatizadas: contraste 7:1 de la paleta, skip link, navegación nativa sin JavaScript, acciones principales visibles, aviso y extensión de sesión, y validación de portadas en cliente y servidor.
+
+Pendiente de verificación manual con navegador: auditoría automatizada (axe o equivalente) sobre las 8 pantallas en los tres tamaños, y las capturas de cada tamaño.
+
 ## Verificación
 
 ```bash
