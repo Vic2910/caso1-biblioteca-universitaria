@@ -10,7 +10,11 @@
         </div>
 
         @if ($categorias->isEmpty())
-            <p class="estado-vacio">No hay categorías registradas aún</p>
+            @include('partials.estado-vacio', [
+                'mensaje' => 'No hay registros',
+                'accion' => 'Nueva categoría',
+                'url' => route('categorias.create'),
+            ])
         @else
             <table class="tabla-gestion">
                 <thead>
@@ -28,7 +32,7 @@
                             <td class="acciones-fila">
                                 <a class="boton boton-secundario"
                                    href="{{ route('categorias.edit', $categoria) }}">Editar</a>
-                                <form method="post" action="{{ route('categorias.destroy', $categoria) }}" onsubmit="return confirm('¿Eliminar la categoría «{{ $categoria->nombre }}»? Esta acción no se puede deshacer.')" style="display:inline">
+                                <form method="post" action="{{ route('categorias.destroy', $categoria) }}" onsubmit="return confirm('¿Eliminar la categoría «{{ $categoria->nombre }}»? Esta acción no se puede deshacer.')" data-confirm="¿Está seguro de que desea eliminar este registro?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="boton boton-peligro">Eliminar</button>

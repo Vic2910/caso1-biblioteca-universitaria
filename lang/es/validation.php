@@ -215,6 +215,8 @@ return [
         'categoria_id' => 'Categoría',
         'portada' => 'Portada',
         'nombre' => 'Nombre',
+        'email' => 'Correo',
+        'password' => 'Contraseña',
     ],
 
 ];

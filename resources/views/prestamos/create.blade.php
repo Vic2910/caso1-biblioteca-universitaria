@@ -19,7 +19,10 @@
 
             <div class="campo-formulario">
                 <label for="libro_id">Libro</label>
-                <select id="libro_id" name="libro_id" required>
+                <select id="libro_id"
+                        name="libro_id"
+                        required
+                        @error('libro_id') aria-invalid="true" aria-describedby="error-libro_id" @enderror>
                     <option value="">Seleccione un libro</option>
                     @foreach ($libros as $libro)
                         <option value="{{ $libro->id }}" @selected(old('libro_id') == $libro->id)>
@@ -28,7 +31,7 @@
                     @endforeach
                 </select>
                 @error('libro_id')
-                    <p class="error-campo" role="alert">{{ $message }}</p>
+                    <p class="error-campo" id="error-libro_id" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -40,9 +43,10 @@
                        value="{{ old('nombre_estudiante') }}"
                        minlength="2"
                        maxlength="255"
-                       required>
+                       required
+                       @error('nombre_estudiante') aria-invalid="true" aria-describedby="error-nombre_estudiante" @enderror>
                 @error('nombre_estudiante')
-                    <p class="error-campo" role="alert">{{ $message }}</p>
+                    <p class="error-campo" id="error-nombre_estudiante" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -53,9 +57,10 @@
                        name="carnet_estudiante"
                        value="{{ old('carnet_estudiante') }}"
                        maxlength="50"
-                       required>
+                       required
+                       @error('carnet_estudiante') aria-invalid="true" aria-describedby="error-carnet_estudiante" @enderror>
                 @error('carnet_estudiante')
-                    <p class="error-campo" role="alert">{{ $message }}</p>
+                    <p class="error-campo" id="error-carnet_estudiante" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -65,9 +70,10 @@
                        id="fecha_prestamo"
                        name="fecha_prestamo"
                        value="{{ old('fecha_prestamo', $fechaPrestamo) }}"
-                       required>
+                       required
+                       @error('fecha_prestamo') aria-invalid="true" aria-describedby="error-fecha_prestamo" @enderror>
                 @error('fecha_prestamo')
-                    <p class="error-campo" role="alert">{{ $message }}</p>
+                    <p class="error-campo" id="error-fecha_prestamo" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -77,9 +83,10 @@
                        id="fecha_devolucion_prevista"
                        name="fecha_devolucion_prevista"
                        value="{{ old('fecha_devolucion_prevista') }}"
-                       required>
+                       required
+                       @error('fecha_devolucion_prevista') aria-invalid="true" aria-describedby="error-fecha_devolucion_prevista" @enderror>
                 @error('fecha_devolucion_prevista')
-                    <p class="error-campo" role="alert">{{ $message }}</p>
+                    <p class="error-campo" id="error-fecha_devolucion_prevista" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -89,21 +96,4 @@
             </div>
         </form>
     </div>
-
-    <style>
-        .formulario-prestamos h2 {
-            margin-top: 0;
-            color: var(--color-primario);
-        }
-
-        .campo-formulario select {
-            width: 100%;
-            max-width: 32rem;
-            padding: 0.4rem 0.6rem;
-            border: 1px solid var(--color-borde);
-            border-radius: 4px;
-            background-color: #ffffff;
-            font: inherit;
-        }
-    </style>
 @endsection

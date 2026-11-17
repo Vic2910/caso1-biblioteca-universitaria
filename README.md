@@ -83,12 +83,68 @@ muestra un aviso en español indicando que hay que revisar la configuración de
 conexión en el archivo `.env`. El aviso nunca incluye usuario, contraseña, host
 ni SQL.
 
+## Interfaz común, accesibilidad y tamaños de pantalla
+
+Todas las vistas comparten una sola estructura (`resources/views/layouts/app.blade.php`):
+cabecera con título y navegación, bloque de sesión, región de mensajes, contenido
+y pie idénticos. La página activa se distingue con `aria-current="page"`, cada
+vista tiene un único `<h1>` y `lang="es"`, y los mensajes de error se muestran
+junto al campo con `aria-invalid` y `aria-describedby`.
+
+**La interfaz se construye con CSS propio sin frameworks CSS**: las reglas viven
+en `public/css/app.css` (layout, foco visible y contraste ≥ 4,5:1) y en los
+bloques `<style>` específicos de alguna vista heredada. No se usa Tailwind,
+Bootstrap ni ninguna otra biblioteca de estilos; el JavaScript es nativo
+(`public/js/app.js` y `public/js/busqueda-catalogo.js`), sin build ni dependencias
+de frontend.
+
+Los estilos responsive cubren tres rangos verificados:
+
+| Rango | Tamaño de referencia | Comportamiento |
+|---|---|---|
+| `≤ 640 px` | 360 × 640 (teléfono) | Una columna, formularios apilados, tablas con desplazamiento propio |
+| `641–1023 px` | 768 × 1024 (tableta) | Rejilla intermedia y navegación legible |
+| `≥ 1024 px` | Escritorio | Diseño amplio, sin cambios respecto a la vista original |
+
+### Capturas de los tres tamaños
+
+| 360 × 640 (teléfono) | 768 × 1024 (tableta) |
+|---|---|
+| ![Catálogo a 360 × 640 px](public/images/capturas/interfaz-360x640.png) | ![Catálogo a 768 × 1024 px](public/images/capturas/interfaz-768x1024.png) |
+
+| ≥ 1024 px (escritorio) |
+|---|
+| ![Catálogo a 1024 px o más](public/images/capturas/interfaz-1024.png) |
+
+## Inicio de sesión y seguridad transversal
+
+Todas las rutas de negocio exigen sesión iniciada; solo `GET /login`,
+`POST /login` y la entrega controlada de portadas (`GET /portadas/{id}`, que
+responde `401` en español sin sesión) quedan fuera del middleware `auth`.
+
+| Aspecto | Comportamiento |
+|---|---|
+| Acceso | Sin sesión, cualquier vista o escritura redirige a `/login` con «Inicie sesión para continuar.» y no ejecuta la operación |
+| Credenciales | `UserSeeder` crea la cuenta de prueba con contraseña hasheada (`Hash::make`); la contraseña se lee de `USUARIO_SEMILLA_PASSWORD` en el entorno, nunca del repositorio |
+| Fallo de login | Cinco intentos fallidos seguidos muestran siempre el mismo mensaje, «Correo o contraseña incorrectos.», sin bloqueo, espera ni pistas sobre si la cuenta existe |
+| Sesión | Caduca tras **2 horas de inactividad** (`SESSION_LIFETIME=120` y comprobación en servidor); entonces «Su sesión expiró. Inicie sesión de nuevo.» y la operación no se procesa |
+| CSRF | Todos los formularios incluyen `@csrf`; un token ausente o manipulado redirige de vuelta sin guardar nada y muestra «Su sesión expiró o el formulario ya no es válido. Actualice la página e inténtelo de nuevo.», conservando lo introducido |
+| Escapado | Toda salida se renderiza con `{{ }}` (no `{!! !!}` con datos), de modo que `<script>` y `' OR 1=1 --` aparecen como texto literal |
+| Eliminaciones | Solo por `DELETE`, con `@csrf`, `@method('DELETE')` y `confirm()` previo en español; un `GET` a esas URL responde `405` y no borra nada |
+| Validación | Form Requests y mensajes en `lang/es/`; errores junto al campo, valores conservados con `old()` y `aria-*` para lectores de pantalla |
+
+### Captura del inicio de sesión
+
+| Formulario de acceso (`/login`) |
+|---|
+| ![Formulario de inicio de sesión](public/images/capturas/login.png) |
+
 ## Consulta del catálogo
 
 La navegación común (cabecera) incluye los enlaces **«Catálogo»**,
 **«Panel»**, **«Préstamos»** y **«Categorías»**, que distinguen visualmente la página activa
-y funcionan en todas las vistas, incluidas las de error. La consulta del
-catálogo ofrece dos rutas, sin autenticación en esta fase:
+y funcionan en todas las vistas. La consulta del catálogo ofrece dos rutas
+(protegidas por sesión; ver «Inicio de sesión y seguridad transversal»):
 
 | Método y ruta | Nombre | Contenido |
 |---|---|---|
@@ -153,9 +209,9 @@ ruta** (sin rutas ni endpoints nuevos), combinables entre sí:
 ## Gestión de libros y categorías
 
 Además de la consulta, la aplicación permite **crear, editar y eliminar** libros
-y categorías desde su propia interfaz (sin autenticación en esta fase). Toda
-escritura pasa por un formulario validado en el servidor; los mensajes de error
-aparecen **junto al campo** correspondiente y lo escrito se conserva (`old()`).
+y categorías desde su propia interfaz (con sesión iniciada). Toda escritura pasa
+por un formulario validado en el servidor; los mensajes de error aparecen
+**junto al campo** correspondiente y lo escrito se conserva (`old()`).
 
 | Ruta | Nombre | Contenido |
 |---|---|---|
@@ -321,9 +377,9 @@ aparecen **junto al campo** y lo escrito se conserva (`old()`).
 ## Panel de la biblioteca
 
 La navegación común incluye el enlace **«Panel»**, que abre una única vista de
-**solo consulta** en `GET /panel` (nombre de ruta `panel.index`). No requiere
-autenticación, no acepta parámetros —la fecha de consulta la fija el servidor— y
-no contiene formularios, botones de escritura ni enlaces de eliminación. Muestra
+**solo consulta** en `GET /panel` (nombre de ruta `panel.index`). Requiere sesión
+iniciada, no acepta parámetros —la fecha de consulta la fija el servidor— y no
+contiene formularios, botones de escritura ni enlaces de eliminación. Muestra
 tres indicadores con rótulos y cifras en español:
 
 | Indicador | Regla de cálculo |
@@ -358,8 +414,17 @@ no añaden frameworks ni dependencias nuevas.
 ```bash
 php artisan migrate:status   # migraciones ejecutadas (100 % «Ran»)
 php artisan migrate:fresh --seed   # rehacer el entorno completo
-php artisan test             # suite de pruebas (verde)
+php artisan test             # suite completa (001–008)
 ```
+
+La suite incluye las nueve pruebas transversales de `008` (`AuthAccesoTest`,
+`AuthLoginTest`, `SesionCaducadaTest`, `CsrfProteccionTest`, `EscapadoSalidaTest`,
+`EliminacionDeleteTest`, `ValidacionTransversalTest`, `AccesibilidadUiTest` y
+`EstadosVaciosTest`). En el entorno de desarrollo queda un fallo heredado y
+conocido en `FalloConexionTest` («acceso denegado»): el MySQL local responde el
+código `1524` (*plugin `mysql_native_password` not loaded*) en lugar de `1045`,
+por lo que el detector de fallos de conexión de `001` no reconoce ese caso.
+No es una regresión de `008`; las demás pruebas pasan.
 
 ## Diagrama entidad-relación
 
@@ -377,6 +442,8 @@ categorias (1) ──────< (N) libros (1) ──────< (N) presta
 - **prestamos**: estudiante, carnet, fechas de préstamo/devolución prevista y
   real, y estado (`activo`, `devuelto` o `vencido`); pertenece a exactamente un
   libro.
+- **users**: `id`, `name`, `email` único, `password` (solo hash) y
+  `remember_token`; sin roles ni permisos, únicamente para la sesión.
 
 El esquema se crea **exclusivamente con migraciones** versionadas en
 `database/migrations/`; nunca con SQL manual.
@@ -395,16 +462,18 @@ capas de confirmación está en «Eliminaciones con confirmación», más arriba
 ## Estructura del proyecto
 
 ```text
-app/Http/Controllers/   # CatalogoController, LibroController, CategoriaController, PrestamoController, PortadaController, PanelController
-app/Http/Requests/      # LibroStoreRequest, CategoriaStoreRequest, RegistrarPrestamoRequest…
-app/Models/             # Categoría, Libro y Prestamo (Eloquent)
+app/Http/Controllers/   # AuthController, CatalogoController, LibroController, CategoriaController, PrestamoController, PortadaController, PanelController
+app/Http/Middleware/    # VerificarInactividad (caducidad de sesión en servidor)
+app/Http/Requests/      # LoginRequest, LibroStoreRequest, CategoriaStoreRequest, RegistrarPrestamoRequest…
+app/Models/             # Categoría, Libro, Prestamo y User (Eloquent)
 app/Services/           # EliminacionService y Prestamos/PrestamoService (reglas de préstamo)
 app/Exceptions/         # FalloConexion (aviso en español ante error de BD)
-lang/es/                # mensajes de validación en español
-database/migrations/    # única fuente del esquema
+lang/es/                # mensajes de validación y de autenticación en español
+database/migrations/    # única fuente del esquema (incluye users)
 database/factories/     # datos de prueba deterministas
-database/seeders/       # CatalogoSeeder (3 categorías, 16 libros, 3 préstamos)
-resources/views/        # layout común, catálogo, libros, categorías, préstamos, panel y errores
-public/js/              # busqueda-catalogo.js (debounce nativo, sin build)
-tests/Feature/          # pruebas de búsqueda, catálogo, gestión, préstamos, panel y casos heredados de la Fase 1
+database/seeders/       # UserSeeder y CatalogoSeeder (3 categorías, 16 libros, 3 préstamos)
+resources/views/        # layout común, login, catálogo, libros, categorías, préstamos, panel, parciales y errores
+public/css/             # app.css (CSS propio, responsive y accesible; sin frameworks)
+public/js/              # app.js (confirmaciones) y busqueda-catalogo.js (debounce nativo, sin build)
+tests/Feature/          # nueve suites transversales de 008 + pruebas de 001–007
 ```

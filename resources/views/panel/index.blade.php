@@ -10,7 +10,7 @@
             <h3>Libros más prestados</h3>
 
             @if ($ranking->isEmpty())
-                <p class="estado-vacio">No hay datos disponibles</p>
+                @include('partials.estado-vacio', ['mensaje' => 'No hay datos disponibles'])
             @else
                 <table class="tabla-panel">
                     <thead>
@@ -39,7 +39,7 @@
             <h3>Préstamos vencidos</h3>
 
             @if ($vencidos->isEmpty())
-                <p class="estado-vacio">No hay datos disponibles</p>
+                @include('partials.estado-vacio', ['mensaje' => 'No hay datos disponibles'])
             @else
                 <table class="tabla-panel">
                     <thead>
@@ -72,7 +72,7 @@
             <h3>Ejemplares disponibles por categoría</h3>
 
             @if ($disponibilidad->isEmpty())
-                <p class="estado-vacio">No hay datos disponibles</p>
+                @include('partials.estado-vacio', ['mensaje' => 'No hay datos disponibles'])
             @else
                 <table class="tabla-panel">
                     <thead>
@@ -93,64 +93,5 @@
             @endif
         </section>
 
-        <style>
-            .panel > h2 {
-                margin-top: 0;
-                color: var(--color-primario);
-            }
-
-            .panel-seccion {
-                background-color: #ffffff;
-                border: 1px solid var(--color-borde);
-                border-radius: 6px;
-                margin-bottom: 1.5rem;
-                overflow-x: auto;
-            }
-
-            .panel-seccion h3 {
-                margin: 0;
-                padding: 0.75rem 1rem;
-                font-size: 1.1rem;
-                color: var(--color-primario);
-                border-bottom: 1px solid var(--color-borde);
-            }
-
-            .panel-seccion .estado-vacio {
-                border: 0;
-                border-radius: 0;
-                margin: 0;
-            }
-
-            table.tabla-panel {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            table.tabla-panel th,
-            table.tabla-panel td {
-                padding: 0.5rem 0.75rem;
-                border-bottom: 1px solid var(--color-borde);
-                text-align: left;
-                white-space: nowrap;
-            }
-
-            table.tabla-panel th {
-                font-size: 0.9rem;
-                color: var(--color-primario);
-            }
-
-            table.tabla-panel tbody tr:last-child td {
-                border-bottom: 0;
-            }
-
-            table.tabla-panel td.cifra {
-                font-weight: bold;
-                text-align: right;
-            }
-
-            table.tabla-panel td.posicion {
-                color: #6c757d;
-            }
-        </style>
     </section>
 @endsection

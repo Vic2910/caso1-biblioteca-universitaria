@@ -15,6 +15,21 @@
             paginación (D-034). El botón se oculta con CSS —nunca con el
             atributo hidden— para que «Enter» envíe el formulario.
         --}}
+        {{-- Regla local: el botón existe para «Enter» pero no ocupa espacio visual (T014). --}}
+        <style>
+            .envio-oculto {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+        </style>
+
         <form id="busqueda" class="barra-busqueda" method="get" action="{{ route('catalogo.index') }}">
             <div class="campo-busqueda">
                 <label for="q">Buscar</label>
@@ -47,9 +62,9 @@
 
         @if ($libros->total() === 0)
             @if ($hayCriterio)
-                <p class="estado-vacio">No se encontraron libros que coincidan con la búsqueda</p>
+                @include('partials.estado-vacio', ['mensaje' => 'No se encontraron libros que coincidan con la búsqueda'])
             @else
-                <p class="estado-vacio">No hay libros registrados aún</p>
+                @include('partials.estado-vacio', ['mensaje' => 'No hay libros registrados aún'])
             @endif
         @else
             <ul class="rejilla-libros">
@@ -68,64 +83,6 @@
 
             {{ $libros->links('pagination.catalogo') }}
         @endif
-
-        <style>
-            form.barra-busqueda {
-                display: flex;
-                align-items: flex-end;
-                flex-wrap: wrap;
-                gap: 0.75rem;
-                background-color: #ffffff;
-                border: 1px solid var(--color-borde);
-                border-radius: 6px;
-                padding: 0.85rem 1rem;
-                margin: 1rem 0 1.25rem;
-            }
-
-            form.barra-busqueda .campo-busqueda {
-                display: flex;
-                flex-direction: column;
-                gap: 0.25rem;
-            }
-
-            form.barra-busqueda .campo-busqueda:first-child {
-                flex: 1 1 18rem;
-            }
-
-            form.barra-busqueda label {
-                font-weight: bold;
-                font-size: 0.9rem;
-                color: var(--color-primario);
-            }
-
-            form.barra-busqueda input[type="text"],
-            form.barra-busqueda select {
-                padding: 0.4rem 0.6rem;
-                border: 1px solid var(--color-borde);
-                border-radius: 4px;
-                background-color: #ffffff;
-                font: inherit;
-            }
-
-            form.barra-busqueda a.limpiar {
-                margin-bottom: 0.1rem;
-            }
-
-            /* Se oculta visualmente conservando la semántica accesible:
-               sin atributo hidden, para que el envío por «Enter» siga
-               funcionando desde el campo de texto (006, T014). */
-            form.barra-busqueda button.envio-oculto {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border: 0;
-            }
-        </style>
 
         <script src="{{ asset('js/busqueda-catalogo.js') }}" defer></script>
     </section>

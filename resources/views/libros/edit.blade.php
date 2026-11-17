@@ -25,7 +25,8 @@
             <form method="post"
                   action="{{ route('libros.portadas.destroy', $libro) }}"
                   id="formulario-eliminar-portada"
-                  onsubmit="return confirm('¿Seguro que desea eliminar la portada de este libro? La imagen dejará de mostrarse.')">
+                  onsubmit="return confirm('¿Seguro que desea eliminar la portada de este libro? La imagen dejará de mostrarse.')"
+                  data-confirm="¿Está seguro de que desea eliminar este registro?">
                 @csrf
                 @method('DELETE')
             </form>

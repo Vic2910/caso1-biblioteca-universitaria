@@ -13,7 +13,12 @@
     <h2>Préstamos registrados</h2>
 
     @if ($prestamos->isEmpty())
-        <p class="estado-vacio">No hay préstamos registrados aún</p>
+        @include('partials.estado-vacio', [
+            'mensaje' => 'No hay registros',
+            'detalle' => 'No hay préstamos registrados aún',
+            'accion' => 'Registrar préstamo',
+            'url' => route('prestamos.create'),
+        ])
     @else
         <table class="tabla-gestion tabla-prestamos">
             <thead>

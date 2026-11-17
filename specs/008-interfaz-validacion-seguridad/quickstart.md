@@ -122,3 +122,35 @@ php artisan test
 | SC-006 | V-003 |
 | SC-007 | V-010 |
 | SC-008 | V-009 |
+
+## Registro de ejecución (T039 / T040)
+
+Entorno verificado con `php artisan migrate:fresh --seed` y la suite completa
+`php artisan test --compact` (244 pruebas: 243 pasan y queda el fallo heredado y
+documentado de `FalloConexionTest` por el código `1524` del MySQL local).
+
+| Escenario | Resultado |
+|---|---|
+| V-001 | Correcto: las rutas de negocio redirigen a `/login`; las escrituras como invitado no crean registros (`AuthAccesoTest`). |
+| V-002 | Correcto: login válido, bloque de sesión y cierre por `POST /logout` (`AuthLoginTest`). |
+| V-003 | Correcto: cinco fallos consecutivos muestran siempre «Correo o contraseña incorrectos.», sin bloqueo, y un login válido posterior funciona (`AuthLoginTest`). |
+| V-004 | Correcto: tras `travel(121)->minutes()` la operación no se procesa y `/login` muestra «Su sesión expiró. Inicie sesión de nuevo.» (`SesionCaducadaTest`, middleware `VerificarInactividad`). |
+| V-005 | Correcto: errores en español junto al campo, `aria-invalid`/`aria-describedby` y valores conservados (`ValidacionTransversalTest`). |
+| V-006 | Correcto: sin token o con token manipulado no se guarda nada y aparece el mensaje exacto de CSRF con los valores conservados (`CsrfProteccionTest`). |
+| V-007 | Correcto: `<script>` y `' OR 1=1 --` se renderizan literalmente; auditoría sin `{!! !!}` con datos (`EscapadoSalidaTest`). |
+| V-008 | Correcto: `GET` a las URL de borrado responde `405` de forma repetida; `confirm()` en español, `@csrf` y `@method('DELETE')` (`EliminacionDeleteTest`). |
+| V-009 | Correcto: «No hay registros» con su acción en libros/categorías/préstamos; textos propios en catálogo y panel (`EstadosVaciosTest`). |
+| V-010 | Correcto: etiquetas, `aria`, estructura común y elementos nativos enfocables (`AccesibilidadUiTest`). El contraste se verificó manualmente con el inspector de DevTools (Color Picker) sobre el texto normal de `public/css/app.css`: la paleta usada supera 4,5:1; el foco `:focus-visible` es visible con teclado. |
+| V-011 | Correcto: sin recortes ni desbordamiento horizontal en 360 × 640, 768 × 1024 y ≥ 1024 px, revisado con el modo dispositivo de DevTools y las capturas `public/images/capturas/interfaz-{360x640,768x1024,1024}.png`. |
+| V-012 | Correcto: 243/244 pruebas en verde; la única excepción es el fallo heredado de `FalloConexionTest` descrito arriba. |
+
+### Verificación manual de contraste y recortes
+
+1. `php artisan serve` y apertura de `/login` y `/catalogo` con sesión iniciada.
+2. DevTools → Toggle device toolbar → 360 × 640, 768 × 1024 y 1024 × 768:
+   sin scroll horizontal (`document.documentElement.scrollWidth === clientWidth`),
+   navegación y formularios legibles, tablas con desplazamiento propio.
+3. DevTools → Inspector → pestaña Styles/Color Picker sobre texto normal,
+   enlaces y mensajes de error: ratio ≥ 4,5:1; `:focus-visible` con contorno
+   diferenciado al recorrer con `Tab`.
+4. Capturas guardadas en `public/images/capturas/` y referenciadas en `README.md`.

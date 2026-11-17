@@ -97,9 +97,12 @@ class PanelLayoutTest extends TestCase
         $documento->loadHTML($primera, LIBXML_NOERROR);
         $xpath = new DOMXPath($documento);
 
-        $this->assertSame(0, $xpath->query('//form')->length, 'El panel no contiene formularios (FR-006)');
-        $this->assertSame(0, $xpath->query('//button')->length, 'El panel no contiene botones de acción');
-        $this->assertSame(0, $xpath->query('//a[contains(@class, "boton")]')->length, 'Sin enlaces de escritura');
+        // 008 añade el bloque de sesión (formulario de logout) a la cabecera
+        // compartida; FR-006 se refiere al contenido del panel, no a ese
+        // control global de autenticación.
+        $this->assertSame(0, $xpath->query('//main//form')->length, 'El panel no contiene formularios (FR-006)');
+        $this->assertSame(0, $xpath->query('//main//button')->length, 'El panel no contiene botones de acción');
+        $this->assertSame(0, $xpath->query('//main//a[contains(@class, "boton")]')->length, 'Sin enlaces de escritura');
     }
 
     public function test_los_metodos_de_escritura_sobre_la_ruta_del_panel_no_estan_disponibles(): void

@@ -37,8 +37,7 @@
         <div class="zona-gestion">
             <a class="boton" href="{{ route('libros.edit', $libro) }}">Editar</a>
 
-            <form method="post" action="{{ route('libros.destroy', $libro) }}"
-                  onsubmit="return confirm('¿Eliminar el libro «{{ $libro->titulo }}»? Esta acción no se puede deshacer.')">
+            <form method="post" action="{{ route('libros.destroy', $libro) }}" onsubmit="return confirm('¿Eliminar el libro «{{ $libro->titulo }}»? Esta acción no se puede deshacer.')" data-confirm="¿Está seguro de que desea eliminar este registro?">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="boton boton-peligro">Eliminar</button>

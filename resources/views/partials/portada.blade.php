@@ -3,8 +3,8 @@
     D-014; ampliada por specs/005-gestion-portadas, D-023/D-024 y
     contracts/ui-structure.md §3).
     Recibe: $libro (App\Models\Libro) con su `portada` y su `titulo`.
-    Con portada, el `src` es la ruta controlada que exige sesión; el `onerror`
-    cubre el 401 de un visitante y el archivo caído mostrando la predeterminada.
+    Con portada, el `src` es la ruta controlada que exige sesión; el script
+    compartido sustituye la imagen por la predeterminada si falla la carga.
 --}}
 @if ($libro->portada === null)
     <img class="portada"

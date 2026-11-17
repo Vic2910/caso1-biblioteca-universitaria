@@ -18,9 +18,10 @@
            id="isbn"
            name="isbn"
            value="{{ old('isbn', $libro->isbn ?? '') }}"
-           required>
+           required
+           @error('isbn') aria-invalid="true" aria-describedby="error-isbn" @enderror>
     @error('isbn')
-        <p class="error-campo" role="alert">{{ $message }}</p>
+        <p class="error-campo" id="error-isbn" role="alert">{{ $message }}</p>
     @enderror
 </div>
 
@@ -30,9 +31,10 @@
            id="titulo"
            name="titulo"
            value="{{ old('titulo', $libro->titulo ?? '') }}"
-           required>
+           required
+           @error('titulo') aria-invalid="true" aria-describedby="error-titulo" @enderror>
     @error('titulo')
-        <p class="error-campo" role="alert">{{ $message }}</p>
+        <p class="error-campo" id="error-titulo" role="alert">{{ $message }}</p>
     @enderror
 </div>
 
@@ -42,9 +44,10 @@
            id="autor"
            name="autor"
            value="{{ old('autor', $libro->autor ?? '') }}"
-           required>
+           required
+           @error('autor') aria-invalid="true" aria-describedby="error-autor" @enderror>
     @error('autor')
-        <p class="error-campo" role="alert">{{ $message }}</p>
+        <p class="error-campo" id="error-autor" role="alert">{{ $message }}</p>
     @enderror
 </div>
 
@@ -54,9 +57,10 @@
            id="editorial"
            name="editorial"
            value="{{ old('editorial', $libro->editorial ?? '') }}"
-           required>
+           required
+           @error('editorial') aria-invalid="true" aria-describedby="error-editorial" @enderror>
     @error('editorial')
-        <p class="error-campo" role="alert">{{ $message }}</p>
+        <p class="error-campo" id="error-editorial" role="alert">{{ $message }}</p>
     @enderror
 </div>
 
@@ -68,9 +72,10 @@
            min="1900"
            max="{{ now()->year }}"
            value="{{ old('anio_publicacion', $libro->anio_publicacion ?? '') }}"
-           required>
+           required
+           @error('anio_publicacion') aria-invalid="true" aria-describedby="error-anio_publicacion" @enderror>
     @error('anio_publicacion')
-        <p class="error-campo" role="alert">{{ $message }}</p>
+        <p class="error-campo" id="error-anio_publicacion" role="alert">{{ $message }}</p>
     @enderror
 </div>
 
@@ -81,15 +86,20 @@
            name="ejemplares_totales"
            min="1"
            value="{{ old('ejemplares_totales', $libro->ejemplares_totales ?? '') }}"
-           required>
+           required
+           @error('ejemplares_totales') aria-invalid="true" aria-describedby="error-ejemplares_totales" @enderror>
     @error('ejemplares_totales')
-        <p class="error-campo" role="alert">{{ $message }}</p>
+        <p class="error-campo" id="error-ejemplares_totales" role="alert">{{ $message }}</p>
     @enderror
 </div>
 
 <div class="campo-formulario">
     <label for="categoria_id">Categoría</label>
-    <select id="categoria_id" name="categoria_id" class="entrada-categoria" required>
+    <select id="categoria_id"
+            name="categoria_id"
+            class="entrada-categoria"
+            required
+            @error('categoria_id') aria-invalid="true" aria-describedby="error-categoria_id" @enderror>
         <option value="">Seleccione una categoría</option>
         @foreach ($categorias as $categoria)
             <option value="{{ $categoria->id }}"
@@ -99,7 +109,7 @@
         @endforeach
     </select>
     @error('categoria_id')
-        <p class="error-campo" role="alert">{{ $message }}</p>
+        <p class="error-campo" id="error-categoria_id" role="alert">{{ $message }}</p>
     @enderror
 </div>
 
@@ -114,21 +124,20 @@
             tras el mensaje de validación de este mismo campo.
         --}}
         @include('partials.portada', ['libro' => $libro])
-        <input type="file"
-               id="portada"
-               name="portada"
-               accept="image/jpeg,image/png,image/webp">
+    @endisset
+    <input type="file"
+           id="portada"
+           name="portada"
+           accept="image/jpeg,image/png,image/webp"
+           @error('portada') aria-invalid="true" aria-describedby="error-portada" @enderror>
+    @error('portada')
+        <p class="error-campo" id="error-portada" role="alert">{{ $message }}</p>
+    @enderror
+    @isset($libro)
         <p class="ayuda-campo">JPG, PNG o WebP, hasta 2 MB. Al guardar un archivo nuevo se reemplaza la portada actual.</p>
     @else
-        <input type="file"
-               id="portada"
-               name="portada"
-               accept="image/jpeg,image/png,image/webp">
         <p class="ayuda-campo">Opcional: imagen JPG, PNG o WebP de hasta 2 MB.</p>
     @endisset
-    @error('portada')
-        <p class="error-campo" role="alert">{{ $message }}</p>
-    @enderror
     @isset($libro)
         @if ($libro->portada !== null)
             {{--

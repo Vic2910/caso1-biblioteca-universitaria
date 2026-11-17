@@ -48,9 +48,10 @@
                        name="fecha_devolucion_real"
                        value="{{ old('fecha_devolucion_real') }}"
                        required
-                       @disabled($prestamo->devuelto())>
+                       @disabled($prestamo->devuelto())
+                       @error('fecha_devolucion_real') aria-invalid="true" aria-describedby="error-fecha_devolucion_real" @enderror>
                 @error('fecha_devolucion_real')
-                    <p class="error-campo" role="alert">{{ $message }}</p>
+                    <p class="error-campo" id="error-fecha_devolucion_real" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -76,11 +77,4 @@
             @endif
         </form>
     </div>
-
-    <style>
-        .formulario-prestamos h2 {
-            margin-top: 0;
-            color: var(--color-primario);
-        }
-    </style>
 @endsection

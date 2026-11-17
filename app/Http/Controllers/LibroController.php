@@ -25,6 +25,16 @@ use Throwable;
 class LibroController extends Controller
 {
     /**
+     * Listado de gestión de libros, ordenado por título.
+     */
+    public function index(): View
+    {
+        return view('libros.index', [
+            'libros' => Libro::query()->with('categoria')->orderBy('titulo')->get(),
+        ]);
+    }
+
+    /**
      * Formulario de alta de libro con el selector de categorías.
      */
     public function create(): View

@@ -16,9 +16,10 @@
                        name="nombre"
                        maxlength="100"
                        value="{{ old('nombre') }}"
-                       required>
+                       required
+                       @error('nombre') aria-invalid="true" aria-describedby="error-nombre" @enderror>
                 @error('nombre')
-                    <p class="error-campo" role="alert">{{ $message }}</p>
+                    <p class="error-campo" id="error-nombre" role="alert">{{ $message }}</p>
                 @enderror
             </div>
 

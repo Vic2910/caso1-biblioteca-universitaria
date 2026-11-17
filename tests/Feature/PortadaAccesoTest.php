@@ -89,6 +89,10 @@ class PortadaAccesoTest extends TestCase
     {
         [$libro] = $this->libroConPortada(['titulo' => 'Cien años de soledad']);
 
+        // 008 protege el resto de rutas con sesión; este escenario exige
+        // comprobar explícitamente el acceso anónimo a la portada.
+        $this->sinSesion();
+
         $respuesta = $this->get(route('portadas.show', $libro));
 
         $respuesta->assertStatus(401);
