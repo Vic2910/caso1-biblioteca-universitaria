@@ -53,6 +53,18 @@
         </ul>
     </section>
 
+    <section aria-labelledby="ayuda-titulo">
+        <h2 id="ayuda-titulo">Ayuda</h2>
+        <details>
+            <summary>Cómo registrar un préstamo</summary>
+            <ol>
+                <li>Inicie sesión con su cuenta.</li>
+                <li>Pulse «Registrar préstamo» en el catálogo o en la sección Préstamos.</li>
+                <li>Elija el libro, indique el estudiante y las fechas, y confirme el registro.</li>
+            </ol>
+        </details>
+    </section>
+
     @auth
         <section aria-labelledby="estadisticas-titulo">
             <h2 id="estadisticas-titulo">Resumen</h2>

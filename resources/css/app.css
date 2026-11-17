@@ -6,6 +6,26 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-primario: #1f4e79;
+    --color-primario-oscuro: #163a5a;
+    --color-fondo: #f5f7fa;
+    --color-texto: #212529;
+    --color-borde: #dee2e6;
+    --color-secundario: #495057;
+    --color-exito: #14532d;
+    --color-peligro: #8b1e2a;
+    --color-foco: #0b5fff;
+
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+
+    --focus-ring-width: 3px;
+    --focus-ring-offset: 2px;
+
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
 }
 
 /* ---- Componentes heredados (002-008), migrados a Vite en 009 ---- */
@@ -15,16 +35,6 @@
  * 768 × 1024 px y escritorio ≥ 1024 px (D-044/D-045).
  */
 
-:root {
-    --color-primario: #1f4e79;
-    --color-primario-oscuro: #163a5a;
-    --color-fondo: #f5f7fa;
-    --color-texto: #212529;
-    --color-borde: #dee2e6;
-    --color-secundario: #495057;
-    --color-exito: #14532d;
-    --color-peligro: #8b1e2a;
-}
 
 * {
     box-sizing: border-box;
@@ -716,10 +726,6 @@ form.barra-busqueda button.envio-oculto {
     transform: translateY(0);
 }
 
-#contenido:focus {
-    outline: none;
-}
-
 nav.site-nav ul.menu-horizontal {
     display: none;
 }
@@ -1023,4 +1029,68 @@ button.boton,
     .toast {
         border: 1px solid ButtonText;
     }
+}
+
+/* ---- 009: componentes del sistema de diseno (T006) ---- */
+.alerta {
+    padding: 0.75rem 1rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-borde);
+    border-left: 4px solid var(--color-primario);
+    border-radius: var(--radius-sm);
+    color: var(--color-texto);
+}
+
+.alerta-exito {
+    border-left-color: var(--color-exito);
+    color: var(--color-exito);
+}
+
+.alerta-error {
+    border-left-color: var(--color-peligro);
+    color: var(--color-peligro);
+}
+
+.estado-carga {
+    min-height: 1.5rem;
+    color: var(--color-secundario);
+    font-weight: 600;
+}
+
+.menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+}
+
+.tabla th,
+.tabla td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-borde);
+    text-align: left;
+    vertical-align: top;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.enlace-accion {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    color: var(--color-primario-oscuro);
+    font-weight: 600;
 }

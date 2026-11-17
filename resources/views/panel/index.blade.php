@@ -9,7 +9,14 @@
         <section class="panel-seccion">
             <h3>Libros más prestados</h3>
 
-            @if ($ranking->isEmpty())
+            <p><a class="enlace-accion" href="{{ route('catalogo.index') }}">Ir al catálogo</a></p>
+
+    <details>
+        <summary>Cómo leer los indicadores</summary>
+        <p>Cada bloque muestra su unidad de medida en texto, por ejemplo préstamos o ejemplares disponibles. Los datos son de solo consulta.</p>
+    </details>
+
+    @if ($ranking->isEmpty())
                 @include('partials.estado-vacio', ['mensaje' => 'No hay datos disponibles'])
             @else
                 <table class="tabla-panel">

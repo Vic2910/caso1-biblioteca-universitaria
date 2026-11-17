@@ -47,8 +47,8 @@ description: "Task list for 009-wcag-aaa-ui-redesign (WCAG 2.1 AAA aplicable)"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Definir los tokens del sistema de diseño en `@theme` de `resources/css/app.css`: color (superficie, texto, borde, acento, éxito, aviso, error — cada par texto/fondo verificado a ≥ 7:1), tipografía (rem 12/14/16/18/20/24/30/36, línea 1,5), espaciado (escala 4 px: 4-8-12-16-24-32-48-64), radios, sombras, `--focus-ring-width: 3px`, `--focus-ring-offset: 2px` y breakpoints `sm: 640px`, `md: 768px`, `lg: 1024px` (D-049)
-- [ ] T006 Crear los componentes reutilizables en `resources/css/app.css` (`@utility`/clases): botón primario/secundario/seguro, campo con etiqueta y error, tarjeta, tabla, alerta, menú, estado vacío, toast, estado de carga — con estados `normal`, `hover`, `focus-visible`, `active`, `error`, `disabled` definidos una sola vez (contracts/ui-structure.md §1)
+- [X] T005 Definir los tokens del sistema de diseño en `@theme` de `resources/css/app.css`: color (superficie, texto, borde, acento, éxito, aviso, error — cada par texto/fondo verificado a ≥ 7:1), tipografía (rem 12/14/16/18/20/24/30/36, línea 1,5), espaciado (escala 4 px: 4-8-12-16-24-32-48-64), radios, sombras, `--focus-ring-width: 3px`, `--focus-ring-offset: 2px` y breakpoints `sm: 640px`, `md: 768px`, `lg: 1024px` (D-049)
+- [X] T006 Crear los componentes reutilizables en `resources/css/app.css` (`@utility`/clases): botón primario/secundario/seguro, campo con etiqueta y error, tarjeta, tabla, alerta, menú, estado vacío, toast, estado de carga — con estados `normal`, `hover`, `focus-visible`, `active`, `error`, `disabled` definidos una sola vez (contracts/ui-structure.md §1)
 - [X] T007 Reestructurar `resources/views/layouts/app.blade.php`: skip link «Saltar al contenido principal» como primer elemento enfocable hacia `#contenido`, `<main id="contenido">`, regiones cabecera/navegación/pie idénticas en todas las vistas, `lang="es"`, un único `<h1>` por vista y `@yield('title')` (contracts/ui-structure.md §2)
 - [X] T008 [P] Regla global `:focus-visible` con `outline: 3px solid var(--color-foco)` + `outline-offset: 2px` (nunca `outline: none` sin sustituto) y utilidades de estado no cromático en `resources/css/app.css` (D-057)
 - [X] T009 [P] Crear `resources/views/partials/toast.blade.php`: contenedor fijo `role="status"` `aria-live="polite"` con mensaje en español, botón «Cerrar mensaje» y auto-ocultado a 6 s (D-052, contracts/ui-structure.md §6)
@@ -67,17 +67,17 @@ description: "Task list for 009-wcag-aaa-ui-redesign (WCAG 2.1 AAA aplicable)"
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Crear `tests/Feature/NavegacionTecladoTest.php`: menús/colapsables exponen `aria-expanded`/`aria-controls`, patrón `<details>` presente, `aria-current="page"` en la página activa, skip link primero y sin trampas de foco (FR-007, contracts/ui-structure.md §3)
+- [X] T012 [P] [US1] Crear `tests/Feature/NavegacionTecladoTest.php`: menús/colapsables exponen `aria-expanded`/`aria-controls`, patrón `<details>` presente, `aria-current="page"` en la página activa, skip link primero y sin trampas de foco (FR-007, contracts/ui-structure.md §3)
 - [X] T013 [P] [US1] Crear `tests/Feature/NavegacionSinJsTest.php`: todas las secciones alcanzables con semántica nativa (`<details>`/`<summary>`, enlaces `<a>`), hamburguesa presente en el markup y formularios operables sin JS (FR-007/FR-008, D-061)
-- [ ] T014 [P] [US1] Crear `tests/Feature/BreakpointsUiTest.php`: markup de navegación coherente en 360, 768 y 1024 px sin desbordamiento horizontal (FR-009)
+- [X] T014 [P] [US1] Crear `tests/Feature/BreakpointsUiTest.php`: markup de navegación coherente en 360, 768 y 1024 px sin desbordamiento horizontal (FR-009)
 
 ### Implementation for User Story 1
 
 - [X] T015 [P] [US1] Crear `resources/js/menus.js`: mejora ARIA de menús y colapsables (`aria-expanded` sincronizado, `Escape` cierra y devuelve el foco al disparador, clic fuera cierra, un solo menú abierto a la vez); importar desde `resources/js/app.js` (D-050)
 - [X] T016 [US1] Rediseñar la navegación de `resources/views/layouts/app.blade.php` con menú desplegable «Gestión» (`<details>`/`<summary>` → Libros, Categorías, Préstamos) y menú hamburguesa `<details>` visible por debajo de `md` (768 px), navegación horizontal por encima; enlaces primer nivel con `aria-current="page"` **y** refuerzo no cromático (D-050, contracts/ui-structure.md §3)
-- [ ] T017 [P] [US1] Aplicar el patrón de secciones colapsables `<details>` a los bloques del home (`resources/views/welcome.blade.php`) y del panel (`resources/views/panel/index.blade.php`)
+- [X] T017 [P] [US1] Aplicar el patrón de secciones colapsables `<details>` a los bloques del home (`resources/views/welcome.blade.php`) y del panel (`resources/views/panel/index.blade.php`)
 - [X] T018 [US1] Ajustar `resources/css/app.css` a los breakpoints de aceptación: 360×640 una columna con hamburguesa, 768×1024 navegación horizontal legible, ≥1024 diseño de referencia; sin recortes ni scroll horizontal (contracts/ui-structure.md §3)
-- [ ] T019 [US1] Ampliar `tests/Feature/AccesibilidadUiTest.php` (008): indicador de foco visible siempre, no oculto bajo cabecera (2.4.7/2.4.11) y objetivos táctiles ≥ 44 px (FR-004)
+- [X] T019 [US1] Ampliar `tests/Feature/AccesibilidadUiTest.php` (008): indicador de foco visible siempre, no oculto bajo cabecera (2.4.7/2.4.11) y objetivos táctiles ≥ 44 px (FR-004)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -92,8 +92,8 @@ description: "Task list for 009-wcag-aaa-ui-redesign (WCAG 2.1 AAA aplicable)"
 ### Tests for User Story 2
 
 - [X] T020 [P] [US2] Crear `tests/Feature/AccionPrincipalTest.php`: ≥ 1 botón primario visible en `/catalogo`, `/libros`, `/categorias`, `/prestamos` (con datos y vacíos), home con accesos reales y recorrido home → registrar préstamo en ≤ 2 pasos (FR-011/FR-012, SC-004, SC-009)
-- [ ] T021 [P] [US2] Crear `tests/Feature/EstadosCargaTest.php`: estado «Cargando…» con `role="status"` anunciado en la región de resultados del catálogo (FR-010, D-051)
-- [ ] T022 [P] [US2] Crear `tests/Feature/ToastExitoTest.php`: mensaje de éxito con `role="status"`, resultado visible en la página tras la operación y errores no auto-ocultos (FR-022, D-052)
+- [X] T021 [P] [US2] Crear `tests/Feature/EstadosCargaTest.php`: estado «Cargando…» con `role="status"` anunciado en la región de resultados del catálogo (FR-010, D-051)
+- [X] T022 [P] [US2] Crear `tests/Feature/ToastExitoTest.php`: mensaje de éxito con `role="status"`, resultado visible en la página tras la operación y errores no auto-ocultos (FR-022, D-052)
 
 ### Implementation for User Story 2
 
@@ -101,9 +101,9 @@ description: "Task list for 009-wcag-aaa-ui-redesign (WCAG 2.1 AAA aplicable)"
 - [X] T024 [US2] Reescribir `resources/views/welcome.blade.php` como home público con accesos reales (Catálogo, Libros, Categorías, Préstamos, Panel), estadísticas (`$totalLibros`, `$totalCategorias`, `$totalPrestamos`) como indicadores con etiqueta textual, acción primaria «Registrar préstamo» (con sesión) / «Iniciar sesión» (sin sesión) y sin aviso de conexión; sin sesión cada acceso conduce a `GET /login` sin ejecutar operación (D-055, contracts/screens.md §1)
 - [X] T025 [P] [US2] Añadir acción principal «Registrar préstamo» + bloque de búsqueda heredado a `resources/views/catalogo/index.blade.php` y renderizar `partials/carga.blade.php` en la región de resultados (D-051/D-056)
 - [X] T026 [P] [US2] Añadir acción principal «Añadir libro» a `resources/views/libros/index.blade.php` y «Nueva categoría» a `resources/views/categorias/index.blade.php` (D-056)
-- [ ] T027 [US2] Añadir acción principal «Registrar préstamo» a `resources/views/prestamos/index.blade.php` (hoy inalcanzable; abre `GET /prestamos/crear`) y «Ir al catálogo» a `resources/views/panel/index.blade.php` (depende de T023)
+- [X] T027 [US2] Añadir acción principal «Registrar préstamo» a `resources/views/prestamos/index.blade.php` (hoy inalcanzable; abre `GET /prestamos/crear`) y «Ir al catálogo» a `resources/views/panel/index.blade.php` (depende de T023)
 - [X] T028 [P] [US2] Añadir acción clara a `resources/views/auth/login.blade.php` («Iniciar sesión») y a las vistas de error `resources/views/errors/401.blade.php`, `404.blade.php` y de conexión («Iniciar sesión» / «Volver al catálogo» / «Reintentar»), con mensajes en español de contracts/screens.md §8
-- [ ] T029 [US2] Integrar la acción principal en `resources/views/partials/estado-vacio.blade.php` conservando los textos heredados («No hay libros registrados aún», «No hay préstamos registrados aún», etc.) — D-060, contracts/user-messages.md §1
+- [X] T029 [US2] Integrar la acción principal en `resources/views/partials/estado-vacio.blade.php` conservando los textos heredados («No hay libros registrados aún», «No hay préstamos registrados aún», etc.) — D-060, contracts/user-messages.md §1
 - [X] T030 [US2] Integrar `partials/toast.blade.php` en `resources/views/layouts/app.blade.php` y asegurar que los `session('success')` existentes lo alimentan sin cambiar sus textos (D-052, D-060)
 
 **Checkpoint**: At this point, User Story 1 AND 2 should both work independently — MVP
@@ -162,11 +162,11 @@ description: "Task list for 009-wcag-aaa-ui-redesign (WCAG 2.1 AAA aplicable)"
 
 ### Tests for User Story 5
 
-- [ ] T043 [P] [US5] Ampliar `tests/Feature/AccesibilidadUiTest.php`: dos pantallas distintas comparten clases de token (tipografía, espaciado, botón, campo) y alto contraste del SO conserva bordes y estados (FR-015, US5)
+- [X] T043 [P] [US5] Ampliar `tests/Feature/AccesibilidadUiTest.php`: dos pantallas distintas comparten clases de token (tipografía, espaciado, botón, campo) y alto contraste del SO conserva bordes y estados (FR-015, US5)
 
 ### Implementation for User Story 5
 
-- [ ] T044 [US5] Pasada de coherencia sobre `resources/views/catalogo/`, `resources/views/libros/`, `resources/views/categorias/`, `resources/views/prestamos/`, `resources/views/panel/`, `resources/views/auth/` y `resources/views/errors/`: sustituir estilos sueltos por componentes y tokens de `resources/css/app.css` sin cambiar rutas, controladores ni textos heredados (D-049, D-060)
+- [X] T044 [US5] Pasada de coherencia sobre `resources/views/catalogo/`, `resources/views/libros/`, `resources/views/categorias/`, `resources/views/prestamos/`, `resources/views/panel/`, `resources/views/auth/` y `resources/views/errors/`: sustituir estilos sueltos por componentes y tokens de `resources/css/app.css` sin cambiar rutas, controladores ni textos heredados (D-049, D-060)
 - [X] T045 [US5] Añadir la sección **«Sistema de diseño»** a `README.md`: herramienta (Tailwind 4 + Vite, `npm run build`/`npm run dev`), tabla de tokens (color con contraste verificado, tipografía, espaciado, radios, sombras), catálogo de componentes y estados, patrones de navegación accesible y mención WCAG 2.1 AAA aplicable con enlace a la matriz (FR-016, D-059)
 - [X] T046 [US5] Verificar la legibilidad con alto contraste del sistema operativo y `prefers-reduced-motion` en `resources/css/app.css`: contenido legible, bordes conservados y sin animaciones esenciales (contracts/ui-structure.md §4)
 
@@ -194,12 +194,12 @@ description: "Task list for 009-wcag-aaa-ui-redesign (WCAG 2.1 AAA aplicable)"
 
 **Purpose**: Validación integral, auditoría AAA, documentación final y limpieza
 
-- [ ] T050 Ejecutar la validación completa de `specs/009-wcag-aaa-ui-redesign/quickstart.md` (V-001…V-014) y registrar resultados
-- [ ] T051 [P] Auditoría AAA (FR-023, D-058): herramienta automatizada (axe o equivalente) sobre las 8 pantallas × 3 tamaños + revisión manual (teclado, foco, sin JS, aviso/extensión de sesión, estados sin color, zoom 200 %, `prefers-reduced-motion`); tabular el cumplimiento en `README.md`
-- [ ] T052 [P] Capturar las 8 pantallas en 360 × 640, 768 × 1024 y ≥ 1024 px y añadirlas a `README.md` junto a la sección del sistema de diseño (FR-016)
+- [X] T050 Ejecutar la validación completa de `specs/009-wcag-aaa-ui-redesign/quickstart.md` (V-001…V-014) y registrar resultados
+- [X] T051 [P] Auditoría AAA (FR-023, D-058): herramienta automatizada (axe o equivalente) sobre las 8 pantallas × 3 tamaños + revisión manual (teclado, foco, sin JS, aviso/extensión de sesión, estados sin color, zoom 200 %, `prefers-reduced-motion`); tabular el cumplimiento en `README.md`
+- [X] T052 [P] Capturar las 8 pantallas en 360 × 640, 768 × 1024 y ≥ 1024 px y añadirlas a `README.md` junto a la sección del sistema de diseño (FR-016)
 - [X] T053 Ejecutar `php artisan test` completo: las 60 suites existentes + las nuevas siguen en verde (regresión de 002–008, D-062)
 - [X] T054 Ejecutar `vendor/bin/pint --dirty --format agent` sobre PHP tocado (T034, T038, T041)
-- [ ] T055 Ejecutar `npm run build` final y `git status` sin artefactos pendientes; commits Conventional (`feat(ui):`, `docs(readme):`, `test(a11y):`) en `feature/interfaz-seguridad` (D-062, G9)
+- [X] T055 Ejecutar `npm run build` final y `git status` sin artefactos pendientes; commits Conventional (`feat(ui):`, `docs(readme):`, `test(a11y):`) en `feature/interfaz-seguridad` (D-062, G9)
 
 ---
 

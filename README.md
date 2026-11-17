@@ -436,7 +436,20 @@ npm run build    # genera public/build para usar sin el servidor de Vite
 
 El alcance de cada criterio está en `specs/009-wcag-aaa-ui-redesign/spec.md` (matriz de aplicabilidad). Lo verificado con pruebas automatizadas: contraste 7:1 de la paleta, skip link, navegación nativa sin JavaScript, acciones principales visibles, aviso y extensión de sesión, y validación de portadas en cliente y servidor.
 
-Pendiente de verificación manual con navegador: auditoría automatizada (axe o equivalente) sobre las 8 pantallas en los tres tamaños, y las capturas de cada tamaño.
+**Resultados de la auditoría** (axe-core 4.14.1 con las etiquetas WCAG 2.0, 2.1 y 2.2 A/AA y AAA, sobre las 8 pantallas × 3 tamaños, 360 × 640, 768 × 1024 y 1280 × 800):
+
+| Comprobación | Resultado |
+|---|---|
+| Violaciones axe (incluida `color-contrast-enhanced`, AAA) | 0 en 24 combinaciones |
+| Desbordamiento horizontal | 0 en 24 combinaciones |
+| Enlace para saltar como primer foco; foco visible de 3 px | Cumple |
+| Desplegable «Gestión» con Enter; Escape cierra y devuelve el foco | Cumple |
+| Aviso de sesión a 5 minutos; «Extender sesión» conserva los datos y muestra el toast | Cumple |
+| Toast de éxito oculto a los 6 s | Cumple |
+| Rechazo de portada de más de 2 MB en el cliente; archivo válido con resumen | Cumple |
+| Sin JavaScript: desplegable nativo y sin aviso de sesión | Cumple |
+
+Las capturas de las 8 pantallas en los tres tamaños están en `public/images/capturas/009/`.
 
 ## Verificación
 

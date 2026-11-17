@@ -195,4 +195,26 @@ class AccesibilidadUiTest extends TestCase
         $this->assertStringContainsString('<form', $html);
         $this->assertStringContainsString('name="_token"', $html);
     }
+
+    public function test_el_foco_visible_y_los_objetivos_tactiles_estan_definidos_en_la_hoja_de_estilos(): void
+    {
+        $css = file_get_contents(resource_path('css/app.css'));
+
+        $this->assertMatchesRegularExpression('/:focus-visible\s*\{[^}]*outline:\s*3px solid/s', $css, 'Foco visible de 3 px (2.4.7/2.4.11)');
+        $this->assertMatchesRegularExpression('/\.boton-primario[^{]*\{[^}]*min-height:\s*44px/s', $css, 'Objetivo táctil de 44 px (2.5.5)');
+        $this->assertDoesNotMatchRegularExpression('/outline:\s*none/', $css, 'Ningún foco se elimina sin sustituto');
+    }
+
+    public function test_dos_pantallas_distintas_comparten_los_mismos_componentes_de_boton(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $listado = $this->htmlDe(route('libros.index'));
+        $prestamo = $this->htmlDe(route('prestamos.create'));
+
+        $this->assertMatchesRegularExpression('/class="boton[ "]/', $listado);
+        $this->assertMatchesRegularExpression('/class="boton[ "]/', $prestamo);
+        $this->assertStringContainsString('class="campo-formulario"', $prestamo);
+        $this->assertStringContainsString('<label for=', $prestamo);
+    }
 }

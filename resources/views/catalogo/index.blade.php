@@ -67,7 +67,7 @@
             @if ($hayCriterio)
                 @include('partials.estado-vacio', ['mensaje' => 'No se encontraron libros que coincidan con la búsqueda'])
             @else
-                @include('partials.estado-vacio', ['mensaje' => 'No hay libros registrados aún'])
+                @include('partials.estado-vacio', ['mensaje' => 'No hay libros registrados aún', 'accion' => 'Añadir libro', 'url' => route('libros.create')])
             @endif
         @else
             <ul class="rejilla-libros">
