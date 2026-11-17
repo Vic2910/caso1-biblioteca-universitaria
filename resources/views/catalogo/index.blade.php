@@ -7,6 +7,7 @@
         <div class="cabecera-seccion">
             <h2>Catálogo de libros</h2>
             <a class="boton" href="{{ route('libros.create') }}">Nuevo libro</a>
+            @include('partials.accion-principal', ['accion' => 'Registrar préstamo', 'url' => route('prestamos.create')])
         </div>
 
         {{--
@@ -59,6 +60,8 @@
                 <a class="boton boton-secundario limpiar" href="{{ route('catalogo.index') }}">Limpiar</a>
             @endif
         </form>
+
+        @include('partials.carga')
 
         @if ($libros->total() === 0)
             @if ($hayCriterio)

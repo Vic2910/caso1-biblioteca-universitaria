@@ -9,6 +9,7 @@ use App\Http\Controllers\LibroController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PortadaController;
 use App\Http\Controllers\PrestamoController;
+use App\Http\Controllers\SesionController;
 use App\Models\Categoria;
 use App\Models\Libro;
 use App\Models\Prestamo;
@@ -31,14 +32,23 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
  */
 Route::get('/portadas/{libro}', [PortadaController::class, 'show'])->whereNumber('libro')->name('portadas.show');
 
+/*
+ * Home público (009, clarificación 2026-11-17): accesos reales; sin sesión,
+ * cada acceso conduce a `/login` sin ejecutar operaciones.
+ */
+Route::get('/', function () {
+    return view('welcome', [
+        'totalLibros' => Libro::query()->count(),
+        'totalCategorias' => Categoria::query()->count(),
+        'totalPrestamos' => Prestamo::query()->count(),
+    ]);
+})->name('inicio');
+
 Route::middleware('auth')->group(function (): void {
-    Route::get('/', function () {
-        return view('welcome', [
-            'totalLibros' => Libro::query()->count(),
-            'totalCategorias' => Categoria::query()->count(),
-            'totalPrestamos' => Prestamo::query()->count(),
-        ]);
-    });
+    /*
+     * Extensión de sesión (009, D-053): renueva la sesión conservando sus datos.
+     */
+    Route::post('/sesion/extender', [SesionController::class, 'extender'])->name('sesion.extender');
 
     Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo.index');
     Route::get('/catalogo/{id}', [CatalogoController::class, 'show'])->whereNumber('id')->name('catalogo.show');

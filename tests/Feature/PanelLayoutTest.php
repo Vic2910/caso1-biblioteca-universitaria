@@ -66,7 +66,7 @@ class PanelLayoutTest extends TestCase
         $documento->loadHTML($html, LIBXML_NOERROR);
         $xpath = new DOMXPath($documento);
 
-        $enlaces = $xpath->query('//nav[contains(@class, "site-nav")]//a[normalize-space(.)="Panel"]');
+        $enlaces = $xpath->query('//nav[contains(@class, "site-nav")]//ul[contains(@class, "menu-horizontal")]//a[normalize-space(.)="Panel"]');
 
         $this->assertSame(1, $enlaces->length, 'Debe existir un único enlace «Panel» en la navegación');
 
@@ -79,7 +79,7 @@ class PanelLayoutTest extends TestCase
         $documentoCatalogo->loadHTML($this->get('/catalogo')->assertOk()->getContent(), LIBXML_NOERROR);
         $xpathCatalogo = new DOMXPath($documentoCatalogo);
 
-        $enlacesCatalogo = $xpathCatalogo->query('//nav[contains(@class, "site-nav")]//a[normalize-space(.)="Panel"]');
+        $enlacesCatalogo = $xpathCatalogo->query('//nav[contains(@class, "site-nav")]//ul[contains(@class, "menu-horizontal")]//a[normalize-space(.)="Panel"]');
 
         $this->assertSame(1, $enlacesCatalogo->length, 'El enlace «Panel» debe estar disponible desde el catálogo');
         $this->assertSame(route('panel.index'), $enlacesCatalogo->item(0)->getAttribute('href'));

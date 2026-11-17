@@ -126,6 +126,7 @@
         @include('partials.portada', ['libro' => $libro])
     @endisset
     <input type="file"
+           data-portada
            id="portada"
            name="portada"
            accept="image/jpeg,image/png,image/webp"

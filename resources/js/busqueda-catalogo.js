@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function prepararEnvio() {
         cancelarEnvioPendiente();
 
+        var estadoCarga = document.getElementById('estado-carga');
+
+        if (estadoCarga !== null) {
+            estadoCarga.textContent = 'Cargando…';
+        }
+
         // Cada criterio parte de la página 1: el formulario nunca envía `page`.
         var pagina = formulario.querySelector('input[name="page"]');
 

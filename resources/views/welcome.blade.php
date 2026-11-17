@@ -3,16 +3,73 @@
 @section('title', 'Biblioteca Universitaria — Inicio')
 
 @section('content')
-    <div class="aviso">
-        <h2>Conexión a la base de datos verificada</h2>
+    <section class="inicio-cabecera">
+        <h2>Bienvenido a la Biblioteca Universitaria</h2>
+        <p>Consulte el catálogo, gestione libros y categorías, y registre préstamos y devoluciones.</p>
+
         <p>
-            La aplicación está conectada correctamente al motor de datos
-            configurado en el archivo <code>.env</code>.
+            @auth
+                <a class="boton-primario" href="{{ route('prestamos.create') }}">Registrar préstamo</a>
+            @else
+                <a class="boton-primario" href="{{ route('login') }}">Iniciar sesión</a>
+            @endauth
         </p>
-        <p>
-            Libros registrados: <strong>{{ $totalLibros }}</strong> &middot;
-            Categorías: <strong>{{ $totalCategorias }}</strong> &middot;
-            Préstamos: <strong>{{ $totalPrestamos }}</strong>
-        </p>
-    </div>
+    </section>
+
+    <section aria-labelledby="accesos-titulo">
+        <h2 id="accesos-titulo">Secciones</h2>
+
+        <ul class="rejilla-accesos">
+            <li>
+                <a class="tarjeta-acceso" href="{{ auth()->check() ? route('catalogo.index') : route('login') }}">
+                    <span class="tarjeta-acceso-titulo">Catálogo</span>
+                    <span>Buscar y consultar los libros disponibles.</span>
+                </a>
+            </li>
+            <li>
+                <a class="tarjeta-acceso" href="{{ auth()->check() ? route('libros.index') : route('login') }}">
+                    <span class="tarjeta-acceso-titulo">Libros</span>
+                    <span>Añadir, editar y gestionar portadas.</span>
+                </a>
+            </li>
+            <li>
+                <a class="tarjeta-acceso" href="{{ auth()->check() ? route('categorias.index') : route('login') }}">
+                    <span class="tarjeta-acceso-titulo">Categorías</span>
+                    <span>Organizar los libros por materia.</span>
+                </a>
+            </li>
+            <li>
+                <a class="tarjeta-acceso" href="{{ auth()->check() ? route('prestamos.index') : route('login') }}">
+                    <span class="tarjeta-acceso-titulo">Préstamos</span>
+                    <span>Registrar, consultar y devolver préstamos.</span>
+                </a>
+            </li>
+            <li>
+                <a class="tarjeta-acceso" href="{{ auth()->check() ? route('panel.index') : route('login') }}">
+                    <span class="tarjeta-acceso-titulo">Panel</span>
+                    <span>Indicadores de uso de la biblioteca.</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+
+    @auth
+        <section aria-labelledby="estadisticas-titulo">
+            <h2 id="estadisticas-titulo">Resumen</h2>
+            <dl class="estadisticas">
+                <div>
+                    <dt>Libros registrados</dt>
+                    <dd>{{ $totalLibros }}</dd>
+                </div>
+                <div>
+                    <dt>Categorías</dt>
+                    <dd>{{ $totalCategorias }}</dd>
+                </div>
+                <div>
+                    <dt>Préstamos</dt>
+                    <dd>{{ $totalPrestamos }}</dd>
+                </div>
+            </dl>
+        </section>
+    @endauth
 @endsection

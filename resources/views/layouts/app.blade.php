@@ -4,15 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Biblioteca Universitaria')</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
+<body @auth data-sesion-expira="{{ now()->addMinutes(config('session.lifetime'))->timestamp }}" @endauth>
+    <a class="enlace-saltar" href="#contenido">Saltar al contenido principal</a>
+
     <header class="site-header">
         <h1>Biblioteca Universitaria</h1>
 
         <nav class="site-nav" aria-label="Navegación principal">
-            <ul>
+            <ul class="menu-horizontal">
                 <li>
                     <a href="{{ url('/') }}" @if (request()->is('/')) class="active" aria-current="page" @endif>Inicio</a>
                 </li>
@@ -20,18 +21,31 @@
                     <a href="{{ route('catalogo.index') }}" @if (request()->routeIs('catalogo.*')) class="active" aria-current="page" @endif>Catálogo</a>
                 </li>
                 <li>
-                    <a href="{{ route('libros.index') }}" @if (request()->routeIs('libros.*')) class="active" aria-current="page" @endif>Libros</a>
+                    <details class="menu-desplegable" data-menu>
+                        <summary @if (request()->routeIs('libros.*', 'categorias.*', 'prestamos.*')) class="active" @endif>Gestión</summary>
+                        <ul class="menu-desplegable-lista">
+                            <li><a href="{{ route('libros.index') }}" @if (request()->routeIs('libros.*')) aria-current="page" @endif>Libros</a></li>
+                            <li><a href="{{ route('categorias.index') }}" @if (request()->routeIs('categorias.*')) aria-current="page" @endif>Categorías</a></li>
+                            <li><a href="{{ route('prestamos.index') }}" @if (request()->routeIs('prestamos.*')) aria-current="page" @endif>Préstamos</a></li>
+                        </ul>
+                    </details>
                 </li>
                 <li>
                     <a href="{{ route('panel.index') }}" @if (request()->routeIs('panel.*')) class="active" aria-current="page" @endif>Panel</a>
                 </li>
-                <li>
-                    <a href="{{ route('prestamos.index') }}" @if (request()->routeIs('prestamos.*')) class="active" aria-current="page" @endif>Préstamos</a>
-                </li>
-                <li>
-                    <a href="{{ route('categorias.index') }}" @if (request()->routeIs('categorias.*')) class="active" aria-current="page" @endif>Categorías</a>
-                </li>
             </ul>
+
+            <details class="menu-hamburguesa" data-menu>
+                <summary>Menú principal</summary>
+                <ul>
+                    <li><a href="{{ url('/') }}" @if (request()->is('/')) aria-current="page" @endif>Inicio</a></li>
+                    <li><a href="{{ route('catalogo.index') }}" @if (request()->routeIs('catalogo.*')) aria-current="page" @endif>Catálogo</a></li>
+                    <li><a href="{{ route('libros.index') }}" @if (request()->routeIs('libros.*')) aria-current="page" @endif>Libros</a></li>
+                    <li><a href="{{ route('categorias.index') }}" @if (request()->routeIs('categorias.*')) aria-current="page" @endif>Categorías</a></li>
+                    <li><a href="{{ route('prestamos.index') }}" @if (request()->routeIs('prestamos.*')) aria-current="page" @endif>Préstamos</a></li>
+                    <li><a href="{{ route('panel.index') }}" @if (request()->routeIs('panel.*')) aria-current="page" @endif>Panel</a></li>
+                </ul>
+            </details>
         </nav>
 
         <div class="sesion-usuario">
@@ -47,9 +61,25 @@
         </div>
     </header>
 
-    <main class="site-main">
+    @auth
+        <div id="aviso-sesion" class="aviso-sesion" role="alertdialog" aria-labelledby="aviso-sesion-texto" hidden>
+            <p id="aviso-sesion-texto">Quedan 5 minutos antes de que finalice su sesión.</p>
+            <div class="aviso-sesion-acciones">
+                <button id="aviso-sesion-extender" type="button" class="boton-primario">Extender sesión</button>
+                <form method="post" action="{{ route('logout') }}">
+                    @csrf
+                    <button class="boton-secundario" type="submit">Cerrar sesión</button>
+                </form>
+            </div>
+            <form id="formulario-extender-sesion" method="post" action="{{ route('sesion.extender') }}" hidden>
+                @csrf
+            </form>
+        </div>
+    @endauth
+
+    <main id="contenido" class="site-main" tabindex="-1">
         @if (session('success'))
-            <div class="mensaje-exito" role="status" aria-live="polite">{{ session('success') }}</div>
+            @include('partials.toast', ['mensaje' => session('success')])
         @endif
 
         @if (session('error'))

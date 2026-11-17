@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Error de conexión — Biblioteca Universitaria</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @if (file_exists(public_path('build/manifest.json')))
+        @vite(['resources/css/app.css'])
+    @endif
 </head>
 <body class="pagina-error">
     <main class="site-main">
@@ -16,6 +18,9 @@
                 continuar, revise la configuración de conexión en el archivo
                 <code>.env</code> (host, puerto, nombre de base de datos y
                 credenciales) y vuelva a intentarlo.
+            </p>
+            <p>
+                <a class="boton-primario" href="{{ url()->current() }}">Reintentar</a>
             </p>
         </div>
     </main>

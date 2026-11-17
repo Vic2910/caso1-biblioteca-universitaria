@@ -12,6 +12,8 @@
 @section('content')
     <h2>Préstamos registrados</h2>
 
+    @include('partials.accion-principal', ['accion' => 'Registrar préstamo', 'url' => route('prestamos.create')])
+
     @if ($prestamos->isEmpty())
         @include('partials.estado-vacio', [
             'mensaje' => 'No hay registros',
